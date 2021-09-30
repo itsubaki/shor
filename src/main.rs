@@ -21,5 +21,9 @@ fn main() {
         return;
     }
 
-    println!("N: {}", n)
+    // TODO: number::base_exp(n)
+
+    let a: i32 = number::coprime(n);
+
+    println!("N: {}, a: {}", n, a)
 }

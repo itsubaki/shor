@@ -1,3 +1,6 @@
+use num::integer;
+use rand::prelude::*;
+
 pub fn is_prime(n: i32) -> bool {
     if n < 2 {
         return false;
@@ -18,4 +21,15 @@ pub fn is_prime(n: i32) -> bool {
     }
 
     return true;
+}
+
+pub fn coprime(n: i32) -> i32 {
+    let mut rng = rand::thread_rng();
+
+    loop {
+        let a: i32 = rng.gen_range(2..n - 1);
+        if integer::gcd(n, a) == 1 {
+            return a;
+        }
+    }
 }
