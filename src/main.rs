@@ -6,6 +6,7 @@ mod quantum;
 fn main() {
     let args: Vec<String> = env::args().collect();
     let n: i32 = args[1].parse().unwrap();
+    let t: i32 = args[3].parse().unwrap();
     let mut a: i32 = args[2].parse().unwrap();
 
     if n < 2 {
@@ -46,7 +47,7 @@ fn main() {
     println!("N: {}, a: {}", n, a);
 
     let mut qsim = quantum::Q::new();
-    let r0 = qsim.zero_with(4);
+    let r0 = qsim.zero_with(t);
     let r1 = qsim.zero_log2(n);
 
     qsim.x(&[r1[r1.len() - 1]]);
