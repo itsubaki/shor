@@ -10,6 +10,7 @@ build: fmt check
 	cargo build
 
 update:
+	rustup update
 	cargo update
 
 fmt:
