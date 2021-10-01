@@ -3,8 +3,8 @@ mod number;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let arg1: &String = &args[1];
-    let n: i32 = arg1.parse().unwrap();
+    let n: i32 = args[1].parse().unwrap();
+    let mut a: i32 = args[2].parse().unwrap();
 
     if n < 2 {
         println!("N={}. N must be greater than 1.", n);
@@ -21,9 +21,27 @@ fn main() {
         return;
     }
 
-    // TODO: number::base_exp(n)
+    let (b, e, ok) = number::base_exp(n);
+    if ok {
+        println!("N={}. N is exponentiation. {}^{}.", n, b, e);
+        return;
+    }
 
-    let a: i32 = number::coprime(n);
+    if a < 0 {
+        a = number::coprime(n);
+    }
 
-    println!("N: {}, a: {}", n, a)
+    if a < 2 || a > n - 1 {
+        println!("N={}, a={}. a must be 1 < a < N.", n, a);
+        return;
+    }
+
+    if number::gcd(n, a) != 1 {
+        println!("N={}, a={}. a is not coprime.", n, a,);
+        return;
+    }
+
+    println!("N: {}, a: {}", n, a);
+
+    // TODO shor
 }
