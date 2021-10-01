@@ -22,6 +22,19 @@ impl Q {
         return self.number_of_bit() - 1;
     }
 
+    pub fn zero_with(&mut self, n: i32) -> Vec<i32> {
+        let mut out = vec![];
+        for _ in 0..n {
+            out.push(self.zero());
+        }
+
+        return out;
+    }
+
+    pub fn zero_log2(&mut self, n: i32) -> Vec<i32> {
+        return vec![0];
+    }
+
     pub fn x(&mut self, qb: &[i32]) {
         let g = vec![
             vec![Complex { re: 0.0, im: 0.0 }, Complex { re: 1.0, im: 0.0 }],
@@ -40,6 +53,10 @@ impl Q {
 
         self.apply(g, qb);
     }
+
+    pub fn cmodexp2(&mut self, a: i32, n: i32, r0: &[i32], r1: &[i32]) {}
+
+    pub fn iqft(&mut self, qb: &[i32]) {}
 
     pub fn apply(&mut self, g: Gate, qb: &[i32]) {
         println!("{:?} {:?}", g, qb);

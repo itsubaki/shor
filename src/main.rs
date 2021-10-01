@@ -45,12 +45,14 @@ fn main() {
 
     println!("N: {}, a: {}", n, a);
 
-    // TODO shor
     let mut qsim = quantum::Q::new();
-    let q0 = qsim.zero();
+    let r0 = qsim.zero_with(4);
+    let r1 = qsim.zero_log2(n);
 
-    qsim.x(&[q0]);
-    qsim.h(&[q0]);
+    qsim.x(&[r1[r1.len() - 1]]);
+    qsim.h(&r0);
+    qsim.cmodexp2(a, n, &r0, &r1);
+    qsim.iqft(&r0);
 
-    println!("{:?} {:?}", qsim, q0);
+    println!("{:?} {:?} {:?}", qsim, r0, r1);
 }
