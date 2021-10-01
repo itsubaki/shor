@@ -48,7 +48,9 @@ fn main() {
     // TODO shor
     let mut qsim = quantum::Q::new();
     let q0 = qsim.zero();
-    qsim.x(q0);
 
-    println!("{:?}", qsim);
+    qsim.x(&[q0]);
+    qsim.h(&[q0]);
+
+    println!("{:?} {:?}", qsim, q0);
 }
