@@ -1,5 +1,7 @@
 use std::env;
+
 mod number;
+mod quantum;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -44,4 +46,9 @@ fn main() {
     println!("N: {}, a: {}", n, a);
 
     // TODO shor
+    let mut qsim = quantum::Q::new();
+    let q0 = qsim.zero();
+    qsim.x(q0);
+
+    println!("{:?}", qsim);
 }
