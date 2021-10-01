@@ -14,7 +14,7 @@ pub fn is_prime(n: i32) -> bool {
         return false;
     }
 
-    for i in 3..((n as f64).sqrt() as i32 + 1) {
+    for i in 3..(integer::sqrt(n) + 1) {
         if n % i == 0 {
             return false;
         }
