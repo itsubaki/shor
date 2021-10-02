@@ -1,7 +1,7 @@
 use num::integer;
 use rand::prelude::*;
 
-pub fn is_prime(n: i32) -> bool {
+pub fn is_prime(n: u32) -> bool {
     if n < 2 {
         return false;
     }
@@ -23,23 +23,23 @@ pub fn is_prime(n: i32) -> bool {
     return true;
 }
 
-pub fn coprime(n: i32) -> i32 {
+pub fn coprime(n: u32) -> u32 {
     let mut rng = rand::thread_rng();
 
     loop {
-        let a: i32 = rng.gen_range(2..n - 1);
+        let a: u32 = rng.gen_range(2..n - 1);
         if gcd(n, a) == 1 {
             return a;
         }
     }
 }
 
-pub fn base_exp(n: i32) -> (u32, u32, bool) {
+pub fn base_exp(n: u32) -> (u32, u32, bool) {
     let s = format!("{:b}", n).chars().count();
     for i in (2..s).rev() {
         let a: f64 = (n as f64).powf(1.0 / (i as f64));
 
-        if (a as u32).pow(i as u32) == (n as u32) {
+        if (a as u32).pow(i as u32) == n {
             return (a as u32, i as u32, true);
         }
     }
@@ -47,7 +47,7 @@ pub fn base_exp(n: i32) -> (u32, u32, bool) {
     return (0, 0, false);
 }
 
-pub fn gcd(a: i32, b: i32) -> i32 {
+pub fn gcd(a: u32, b: u32) -> u32 {
     return integer::gcd(a, b);
 }
 

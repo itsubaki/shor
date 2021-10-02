@@ -1,8 +1,8 @@
 SHELL := /bin/bash
 
 run: fmt
-	# N=15, a=-1, t=3
-	cargo run 15 -1 3
+	# N=15, a=0, t=3
+	cargo run 15 0 3
 
 test: fmt
 	cargo test
