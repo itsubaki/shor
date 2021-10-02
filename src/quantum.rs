@@ -96,22 +96,7 @@ impl Q {
     }
 
     pub fn x(&mut self, qb: &[u32]) {
-        let mut g = id();
-        if qb[0] == 0 {
-            g = x();
-        }
-
-        for i in 0..self.number_of_bit() {
-            for j in 0..qb.len() {
-                if i == qb[j] {
-                    g = tensor_product(g, x());
-                    continue;
-                }
-                g = tensor_product(g, id());
-            }
-        }
-
-        self.apply(g);
+        self.apply(x());
     }
 
     pub fn h(&mut self, qb: &[u32]) {
