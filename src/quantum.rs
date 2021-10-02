@@ -1,25 +1,50 @@
 use num::Complex;
 
-pub type Qubit = Vec<Complex<f64>>;
-
 pub type Gate = Vec<Vec<Complex<f64>>>;
+
+fn x() -> Gate {
+    return vec![
+        vec![Complex { re: 0.0, im: 0.0 }, Complex { re: 1.0, im: 0.0 }],
+        vec![Complex { re: 1.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }],
+    ];
+}
+
+fn h() -> Gate {
+    let e = Complex {
+        re: 1.0 / 2.0f64.sqrt(),
+        im: 0.0,
+    };
+
+    return vec![vec![e, e], vec![e, -1.0 * e]];
+}
+
+pub type Qubit = Vec<Complex<f64>>;
 
 #[derive(Debug)]
 pub struct Q {
     qb: Qubit,
 }
 
+pub fn new() -> Q {
+    return Q { qb: vec![] };
+}
+
 impl Q {
-    pub fn new() -> Q {
-        return Q { qb: vec![] };
+    pub fn new(&mut self, v: Qubit) -> i32 {
+        if self.qb.len() == 0 {
+            self.qb = v;
+            return 0;
+        }
+
+        self.tensor_product(v);
+        return self.number_of_bit() - 1;
     }
 
     pub fn zero(&mut self) -> i32 {
-        self.tensor_product(vec![
+        return self.new(vec![
             Complex { re: 1.0, im: 0.0 },
             Complex { re: 0.0, im: 0.0 },
         ]);
-        return self.number_of_bit() - 1;
     }
 
     pub fn zero_with(&mut self, n: i32) -> Vec<i32> {
@@ -32,26 +57,20 @@ impl Q {
     }
 
     pub fn zero_log2(&mut self, n: i32) -> Vec<i32> {
-        return vec![0];
+        let s = ((n as f64).log2() as i32) + 1;
+        return self.zero_with(s);
+    }
+
+    pub fn number_of_bit(&self) -> i32 {
+        return (self.qb.len() as f64).log2() as i32;
     }
 
     pub fn x(&mut self, qb: &[i32]) {
-        let g = vec![
-            vec![Complex { re: 0.0, im: 0.0 }, Complex { re: 1.0, im: 0.0 }],
-            vec![Complex { re: 1.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }],
-        ];
-
-        self.apply(g, qb);
+        self.apply(x(), qb);
     }
 
     pub fn h(&mut self, qb: &[i32]) {
-        let e = Complex {
-            re: 1.0 / 2.0f64.sqrt(),
-            im: 0.0,
-        };
-        let g = vec![vec![e, e], vec![e, -1.0 * e]];
-
-        self.apply(g, qb);
+        self.apply(h(), qb);
     }
 
     pub fn cmodexp2(&mut self, a: i32, n: i32, r0: &[i32], r1: &[i32]) {}
@@ -60,10 +79,6 @@ impl Q {
 
     pub fn apply(&mut self, g: Gate, qb: &[i32]) {
         println!("{:?} {:?}", g, qb);
-    }
-
-    pub fn number_of_bit(&self) -> i32 {
-        return 1;
     }
 
     pub fn tensor_product(&mut self, qb: Qubit) {
