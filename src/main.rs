@@ -5,9 +5,9 @@ mod quantum;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let n: i32 = args[1].parse().unwrap();
-    let t: i32 = args[3].parse().unwrap();
-    let mut a: i32 = args[2].parse().unwrap();
+    let n: i32 = args[1].parse().unwrap(); // positive integer
+    let t: i32 = args[3].parse().unwrap(); // precision bits
+    let mut a: i32 = args[2].parse().unwrap(); // coprime number of n
 
     if n < 2 {
         println!("N={}. N must be greater than 1.", n);
