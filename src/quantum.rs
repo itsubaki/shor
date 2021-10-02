@@ -1,5 +1,7 @@
 use num::Complex;
 
+pub type Qubit = Vec<Complex<f64>>;
+
 pub type Gate = Vec<Vec<Complex<f64>>>;
 
 fn x() -> Gate {
@@ -11,14 +13,12 @@ fn x() -> Gate {
 
 fn h() -> Gate {
     let e = Complex {
-        re: 1.0 / 2.0f64.sqrt(),
+        re: 1.0 / std::f64::consts::SQRT_2,
         im: 0.0,
     };
 
     return vec![vec![e, e], vec![e, -1.0 * e]];
 }
-
-pub type Qubit = Vec<Complex<f64>>;
 
 #[derive(Debug)]
 pub struct Q {
@@ -30,13 +30,13 @@ pub fn new() -> Q {
 }
 
 impl Q {
-    pub fn new(&mut self, v: Qubit) -> u32 {
+    pub fn new(&mut self, qb: Qubit) -> u32 {
         if self.qb.len() == 0 {
-            self.qb = v;
+            self.qb = qb;
             return 0;
         }
 
-        self.tensor_product(v);
+        self.tensor_product(qb);
         return self.number_of_bit() - 1;
     }
 
@@ -77,11 +77,16 @@ impl Q {
 
     pub fn iqft(&mut self, qb: &[u32]) {}
 
-    pub fn apply(&mut self, g: Gate, qb: &[u32]) {
-        println!("{:?} {:?}", g, qb);
-    }
+    pub fn apply(&mut self, g: Gate, qb: &[u32]) {}
 
     pub fn tensor_product(&mut self, qb: Qubit) {
-        self.qb = qb
+        let mut v = vec![];
+        for i in 0..self.qb.len() {
+            for j in 0..qb.len() {
+                v.push(self.qb[i] * qb[j]);
+            }
+        }
+
+        self.qb = v
     }
 }

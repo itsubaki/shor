@@ -1,10 +1,8 @@
-use std::env;
-
 mod number;
 mod quantum;
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let args: Vec<String> = std::env::args().collect();
     let n: u32 = args[1].parse().unwrap(); // positive integer
     let t: u32 = args[3].parse().unwrap(); // precision bits
     let mut a: u32 = args[2].parse().unwrap(); // coprime number of n
