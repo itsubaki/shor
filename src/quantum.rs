@@ -63,9 +63,13 @@ impl Q {
         self.apply(h(), qb);
     }
 
-    pub fn cmodexp2(&mut self, a: u32, n: u32, r0: &[u32], r1: &[u32]) {}
+    pub fn cmodexp2(&mut self, a: u32, n: u32, r0: &[u32], r1: &[u32]) {
+        println!("cmodexp2({}, {}, {:?}, {:?})", a, n, r0, r1);
+    }
 
-    pub fn iqft(&mut self, qb: &[u32]) {}
+    pub fn iqft(&mut self, qb: &[u32]) {
+        println!("iqft({:?})", qb);
+    }
 
     pub fn apply(&mut self, g: Gate, qb: &[u32]) {
         let list: Vec<Gate> = self.gate_list(g, qb);
@@ -118,8 +122,9 @@ impl Q {
     }
 
     pub fn state(&mut self) -> Vec<State> {
-        let mut out = vec![];
         let z = Complex { re: 0.0, im: 0.0 };
+
+        let mut out = vec![];
         for i in 0..self.qb.len() {
             if self.qb[i] == z {
                 continue;
