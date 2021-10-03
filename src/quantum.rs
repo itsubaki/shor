@@ -4,7 +4,6 @@ pub type Qubit = Vec<Complex<f64>>;
 
 pub type Gate = Vec<Vec<Complex<f64>>>;
 
-#[derive(Debug)]
 pub struct Q {
     qb: Qubit,
 }
