@@ -55,6 +55,12 @@ fn main() {
 
     let s = qsim.state();
     for i in 0..s.len() {
-        println!("{:>07b} {:>.4} {:>.4}", s[i].index, s[i].amp, s[i].prob);
+        println!(
+            "{:>0n$b} {:>.4} {:>.4}",
+            s[i].index,
+            s[i].amp,
+            s[i].prob,
+            n = qsim.number_of_bit() as usize,
+        );
     }
 }
