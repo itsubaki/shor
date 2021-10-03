@@ -9,6 +9,12 @@ pub struct Q {
     qb: Qubit,
 }
 
+pub struct State {
+    pub index: usize,
+    pub amp: Complex<f64>,
+    pub prob: f64,
+}
+
 pub fn new() -> Q {
     return Q { qb: vec![] };
 }
@@ -65,7 +71,17 @@ impl Q {
         let list: Vec<Gate> = self.gate_list(g, qb);
         let g: Gate = tensor_product_(&list);
 
-        println!("gate: {:?}, len: {}:{}", g, g.len(), g[0].len());
+        let mut v = vec![];
+        for i in 0..g.len() {
+            let mut r = Complex { re: 0.0, im: 0.0 };
+            for j in 0..g[i].len() {
+                r = r + g[i][j] * self.qb[j]
+            }
+
+            v.push(r);
+        }
+
+        self.qb = v;
     }
 
     fn gate_list(&mut self, g: Gate, qb: &[u32]) -> Vec<Gate> {
@@ -99,6 +115,25 @@ impl Q {
         }
 
         self.qb = v
+    }
+
+    pub fn state(&mut self) -> Vec<State> {
+        let mut out = vec![];
+        let z = Complex { re: 0.0, im: 0.0 };
+        for i in 0..self.qb.len() {
+            if self.qb[i] == z {
+                continue;
+            }
+
+            out.push(State {
+                index: i,
+                amp: self.qb[i],
+                prob: self.qb[i].norm().powf(2.0),
+            });
+            // println!("{:>07b} {}", i, self.qb[i]);
+        }
+
+        return out;
     }
 }
 
