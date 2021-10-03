@@ -55,6 +55,6 @@ fn main() {
 
     let s = qsim.state();
     for i in 0..s.len() {
-        println!("{:>07b} {}", s[i].index, s[i].amp);
+        println!("{:>07b} {:>.4} {:>.4}", s[i].index, s[i].amp, s[i].prob);
     }
 }

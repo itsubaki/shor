@@ -130,7 +130,6 @@ impl Q {
                 amp: self.qb[i],
                 prob: self.qb[i].norm().powf(2.0),
             });
-            // println!("{:>07b} {}", i, self.qb[i]);
         }
 
         return out;
