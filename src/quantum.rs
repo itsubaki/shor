@@ -50,31 +50,45 @@ impl Q {
     }
 
     pub fn x(&mut self, qb: &[u32]) {
-        self.apply(x(), qb);
+        let list: Vec<Gate> = self.gate_list(x(), qb);
+        let g: Gate = tensor_product_list(list);
+        self.apply(g);
     }
 
     pub fn h(&mut self, qb: &[u32]) {
-        self.apply(h(), qb);
+        let list: Vec<Gate> = self.gate_list(h(), qb);
+        let g: Gate = tensor_product_list(list);
+        self.apply(g);
     }
 
     pub fn cmodexp2(&mut self, a: u32, n: u32, r0: &[u32], r1: &[u32]) {}
 
     pub fn iqft(&mut self, qb: &[u32]) {}
 
-    pub fn apply(&mut self, g: Gate, qb: &[u32]) {
+    pub fn apply(&mut self, g: Gate) {
+        println!("gate: {:?}, len: {}:{}", g, g.len(), g[0].len());
+    }
+
+    fn gate_list(&mut self, g: Gate, qb: &[u32]) -> Vec<Gate> {
         let mut list = vec![];
         for i in 0..self.number_of_bit() {
+            let mut found = false;
             for j in 0..qb.len() {
                 if i == qb[j] {
-                    list.push(clone(&g));
-                    continue;
+                    found = true;
+                    break;
                 }
-                list.push(id());
             }
+
+            if found {
+                list.push(clone(&g));
+                continue;
+            }
+
+            list.push(id());
         }
 
-        let gg: Gate = tensor_product_list(&list);
-        println!("gate: {:?}", gg);
+        return list;
     }
 
     fn tensor_product(&mut self, qb: Qubit) {
@@ -89,7 +103,7 @@ impl Q {
     }
 }
 
-fn tensor_product(m: Gate, n: Gate) -> Gate {
+fn tensor_product(m: &Gate, n: &Gate) -> Gate {
     let mut out: Gate = vec![];
     for i in 0..m.len() {
         for k in 0..n.len() {
@@ -107,13 +121,13 @@ fn tensor_product(m: Gate, n: Gate) -> Gate {
     return out;
 }
 
-fn tensor_product_list(g: &[Gate]) -> Gate {
-    let mut out = clone(&g[0]);
-    for i in 1..g.len() {
-        out = tensor_product(out, clone(&g[i]));
+fn tensor_product_list(list: Vec<Gate>) -> Gate {
+    let mut g: Gate = clone(&list[0]);
+    for i in 1..list.len() {
+        g = tensor_product(&g, &list[i]);
     }
 
-    return out;
+    return g;
 }
 
 fn clone(g: &Gate) -> Gate {
