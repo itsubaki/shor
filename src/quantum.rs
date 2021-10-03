@@ -50,22 +50,21 @@ impl Q {
     }
 
     pub fn x(&mut self, qb: &[u32]) {
-        let list: Vec<Gate> = self.gate_list(x(), qb);
-        let g: Gate = tensor_product_list(list);
-        self.apply(g);
+        self.apply(x(), qb);
     }
 
     pub fn h(&mut self, qb: &[u32]) {
-        let list: Vec<Gate> = self.gate_list(h(), qb);
-        let g: Gate = tensor_product_list(list);
-        self.apply(g);
+        self.apply(h(), qb);
     }
 
     pub fn cmodexp2(&mut self, a: u32, n: u32, r0: &[u32], r1: &[u32]) {}
 
     pub fn iqft(&mut self, qb: &[u32]) {}
 
-    pub fn apply(&mut self, g: Gate) {
+    pub fn apply(&mut self, g: Gate, qb: &[u32]) {
+        let list: Vec<Gate> = self.gate_list(g, qb);
+        let g: Gate = tensor_product_(list);
+
         println!("gate: {:?}, len: {}:{}", g, g.len(), g[0].len());
     }
 
@@ -121,7 +120,7 @@ fn tensor_product(m: &Gate, n: &Gate) -> Gate {
     return out;
 }
 
-fn tensor_product_list(list: Vec<Gate>) -> Gate {
+fn tensor_product_(list: Vec<Gate>) -> Gate {
     let mut g: Gate = clone(&list[0]);
     for i in 1..list.len() {
         g = tensor_product(&g, &list[i]);
