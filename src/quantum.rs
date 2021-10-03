@@ -63,7 +63,7 @@ impl Q {
 
     pub fn apply(&mut self, g: Gate, qb: &[u32]) {
         let list: Vec<Gate> = self.gate_list(g, qb);
-        let g: Gate = tensor_product_(list);
+        let g: Gate = tensor_product_(&list);
 
         println!("gate: {:?}, len: {}:{}", g, g.len(), g[0].len());
     }
@@ -120,7 +120,7 @@ fn tensor_product(m: &Gate, n: &Gate) -> Gate {
     return out;
 }
 
-fn tensor_product_(list: Vec<Gate>) -> Gate {
+fn tensor_product_(list: &[Gate]) -> Gate {
     let mut g: Gate = clone(&list[0]);
     for i in 1..list.len() {
         g = tensor_product(&g, &list[i]);
