@@ -7,6 +7,9 @@ run: fmt
 test: fmt
 	cargo test
 
+lint: fmt
+	cargo clippy
+
 build: fmt check
 	cargo build
 

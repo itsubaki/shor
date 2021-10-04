@@ -1,14 +1,14 @@
 use num::Complex;
 use std::rc::Rc;
 
-pub type Matrix = Vec<Vec<Complex<f64>>>;
-
 pub type Qubit = Vec<Complex<f64>>;
 
 pub type Gate = Rc<Matrix>;
 
+pub type Matrix = Vec<Vec<Complex<f64>>>;
+
 pub struct State {
-    n: usize,
+    number_of_bit: u32,
     pub index: usize,
     pub amp: Complex<f64>,
     pub prob: f64,
@@ -22,7 +22,7 @@ impl std::fmt::Display for State {
             self.index,
             self.amp,
             self.prob,
-            n = self.n,
+            n = self.number_of_bit as usize,
         )
     }
 }
@@ -31,49 +31,50 @@ pub struct Q {
     qb: Qubit,
 }
 
-pub fn new() -> Q {
-    return Q { qb: vec![] };
-}
-
 impl Q {
-    pub fn new(&mut self, qb: Qubit) -> u32 {
-        if self.qb.len() == 0 {
+    pub fn new() -> Q {
+        Q { qb: vec![] }
+    }
+
+    pub fn add(&mut self, qb: Qubit) -> u32 {
+        if self.qb.is_empty() {
             self.qb = qb;
             return 0;
         }
-
         self.tensor_vec(qb);
-        return self.number_of_bit() - 1;
+
+        self.number_of_bit() - 1
     }
 
     pub fn zero(&mut self) -> u32 {
-        return self.new(vec![
+        self.add(vec![
             Complex { re: 1.0, im: 0.0 },
             Complex { re: 0.0, im: 0.0 },
-        ]);
+        ])
     }
 
     pub fn zero_with(&mut self, n: u32) -> Vec<u32> {
-        let mut out: Vec<u32> = vec![];
+        let mut list: Vec<u32> = vec![];
 
         for _ in 0..n {
-            out.push(self.zero());
+            list.push(self.zero());
         }
 
-        return out;
+        list
     }
 
     pub fn zero_log2(&mut self, n: u32) -> Vec<u32> {
         let s = ((n as f64).log2() as u32) + 1;
-        return self.zero_with(s);
+
+        self.zero_with(s)
     }
 
     fn tensor_vec(&mut self, qb: Qubit) {
         let mut v: Qubit = vec![];
 
-        for i in 0..self.qb.len() {
-            for j in 0..qb.len() {
-                v.push(self.qb[i] * qb[j]);
+        for w in &self.qb {
+            for j in &qb {
+                v.push(w * j);
             }
         }
 
@@ -81,7 +82,7 @@ impl Q {
     }
 
     pub fn number_of_bit(&self) -> u32 {
-        return (self.qb.len() as f64).log2() as u32;
+        (self.qb.len() as f64).log2() as u32
     }
 
     pub fn x(&mut self, qb: &[u32]) {
@@ -96,7 +97,19 @@ impl Q {
         let list: Vec<Gate> = self.gate_list(g, id(), qb);
         let g: Gate = tensor_(&list);
 
-        self.qb = apply(g, &self.qb);
+        let mut v: Qubit = vec![];
+
+        for i in 0..g.len() {
+            let mut e = Complex { re: 0.0, im: 0.0 };
+
+            for j in 0..g[i].len() {
+                e += g[i][j] * self.qb[j];
+            }
+
+            v.push(e);
+        }
+
+        self.qb = v
     }
 
     pub fn cmodexp2(&mut self, a: u32, n: u32, r0: &[u32], r1: &[u32]) {
@@ -113,8 +126,8 @@ impl Q {
         for i in 0..self.number_of_bit() {
             let mut found = false;
 
-            for j in 0..qb.len() {
-                if i == qb[j] {
+            for j in qb {
+                if i == *j {
                     found = true;
                     break;
                 }
@@ -128,60 +141,44 @@ impl Q {
             list.push(Rc::clone(&id));
         }
 
-        return list;
+        list
     }
 
     pub fn state(&self) -> Vec<State> {
         let z: Complex<f64> = Complex { re: 0.0, im: 0.0 };
-        let n: usize = self.number_of_bit() as usize;
+        let n: u32 = self.number_of_bit();
 
-        let mut out: Vec<State> = vec![];
+        let mut list: Vec<State> = vec![];
 
         for i in 0..self.qb.len() {
             if self.qb[i] == z {
                 continue;
             }
 
-            out.push(State {
-                n: n,
+            list.push(State {
+                number_of_bit: n,
                 index: i,
                 amp: self.qb[i],
                 prob: self.qb[i].norm().powf(2.0),
             });
         }
 
-        return out;
+        list
     }
-}
-
-fn apply(g: Gate, qb: &Qubit) -> Qubit {
-    let mut out: Qubit = vec![];
-
-    for i in 0..g.len() {
-        let mut r = Complex { re: 0.0, im: 0.0 };
-
-        for j in 0..g[i].len() {
-            r = r + g[i][j] * qb[j]
-        }
-
-        out.push(r);
-    }
-
-    return out;
 }
 
 fn tensor_(list: &[Gate]) -> Gate {
     let mut g: Gate = Rc::clone(&list[0]);
 
-    for i in 1..list.len() {
-        g = tensor(g, Rc::clone(&list[i]));
+    for i in list.iter().skip(1) {
+        g = tensor(g, Rc::clone(i));
     }
 
-    return g;
+    g
 }
 
 fn tensor(m: Gate, n: Gate) -> Gate {
-    let mut out: Matrix = vec![];
+    let mut g: Matrix = vec![];
 
     for i in 0..m.len() {
         for k in 0..n.len() {
@@ -193,25 +190,25 @@ fn tensor(m: Gate, n: Gate) -> Gate {
                 }
             }
 
-            out.push(v);
+            g.push(v);
         }
     }
 
-    return Rc::new(out);
+    Rc::new(g)
 }
 
 fn id() -> Gate {
-    return Rc::new(vec![
+    Rc::new(vec![
         vec![Complex { re: 1.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }],
         vec![Complex { re: 0.0, im: 0.0 }, Complex { re: 1.0, im: 0.0 }],
-    ]);
+    ])
 }
 
 fn x() -> Gate {
-    return Rc::new(vec![
+    Rc::new(vec![
         vec![Complex { re: 0.0, im: 0.0 }, Complex { re: 1.0, im: 0.0 }],
         vec![Complex { re: 1.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }],
-    ]);
+    ])
 }
 
 fn h() -> Gate {
@@ -220,5 +217,5 @@ fn h() -> Gate {
         im: 0.0,
     };
 
-    return Rc::new(vec![vec![e, e], vec![e, -1.0 * e]]);
+    Rc::new(vec![vec![e, e], vec![e, -1.0 * e]])
 }

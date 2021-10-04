@@ -20,7 +20,7 @@ pub fn is_prime(n: u32) -> bool {
         }
     }
 
-    return true;
+    true
 }
 
 pub fn coprime(n: u32) -> u32 {
@@ -44,11 +44,11 @@ pub fn base_exp(n: u32) -> (u32, u32, bool) {
         }
     }
 
-    return (0, 0, false);
+    (0, 0, false)
 }
 
 pub fn gcd(a: u32, b: u32) -> u32 {
-    return integer::gcd(a, b);
+    integer::gcd(a, b)
 }
 
 #[test]

@@ -22,9 +22,9 @@ fn main() {
         return;
     }
 
-    let (b, e, ok) = number::base_exp(n);
+    let (base, exp, ok) = number::base_exp(n);
     if ok {
-        println!("N={}. N is exponentiation. {}^{}.", n, b, e);
+        println!("N={}. N is exponentiation. {}^{}.", n, base, exp);
         return;
     }
 
@@ -44,7 +44,7 @@ fn main() {
 
     println!("N: {}, a: {}, t: {}", n, a, t);
 
-    let mut qsim = quantum::new();
+    let mut qsim = quantum::Q::new();
     let r0 = qsim.zero_with(t);
     let r1 = qsim.zero_log2(n);
 
