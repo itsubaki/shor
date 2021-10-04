@@ -28,6 +28,7 @@ pub fn coprime(n: u32) -> u32 {
 
     loop {
         let a: u32 = rng.gen_range(2..n - 1);
+
         if gcd(n, a) == 1 {
             return a;
         }
@@ -36,6 +37,7 @@ pub fn coprime(n: u32) -> u32 {
 
 pub fn base_exp(n: u32) -> (u32, u32, bool) {
     let s = format!("{:b}", n).chars().count();
+
     for i in (2..s).rev() {
         let a: f64 = (n as f64).powf(1.0 / (i as f64));
 
