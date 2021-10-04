@@ -7,10 +7,6 @@ pub type Qubit = Vec<Complex<f64>>;
 
 pub type Gate = Rc<Matrix>;
 
-pub struct Q {
-    qb: Qubit,
-}
-
 pub struct State {
     n: usize,
     pub index: usize,
@@ -29,6 +25,10 @@ impl std::fmt::Display for State {
             n = self.n,
         )
     }
+}
+
+pub struct Q {
+    qb: Qubit,
 }
 
 pub fn new() -> Q {
