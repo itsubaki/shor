@@ -53,14 +53,7 @@ fn main() {
     qsim.cmodexp2(a, n, &r0, &r1);
     qsim.iqft(&r0);
 
-    let s = qsim.state();
-    for i in 0..s.len() {
-        println!(
-            "{:>0n$b} {:>.4} {:>.4}",
-            s[i].index,
-            s[i].amp,
-            s[i].prob,
-            n = qsim.number_of_bit() as usize,
-        );
+    for s in qsim.state().iter() {
+        println!("{}", s);
     }
 }
