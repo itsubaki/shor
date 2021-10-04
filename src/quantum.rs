@@ -112,14 +112,6 @@ impl Q {
         self.qb = v
     }
 
-    pub fn cmodexp2(&mut self, a: u32, n: u32, r0: &[u32], r1: &[u32]) {
-        println!("cmodexp2({}, {}, {:?}, {:?})", a, n, r0, r1);
-    }
-
-    pub fn iqft(&mut self, qb: &[u32]) {
-        println!("iqft({:?})", qb);
-    }
-
     fn gate_list(&self, g: Gate, id: Gate, qb: &[u32]) -> Vec<Gate> {
         let mut list: Vec<Gate> = vec![];
 
@@ -142,6 +134,14 @@ impl Q {
         }
 
         list
+    }
+
+    pub fn cmodexp2(&mut self, a: u32, n: u32, r0: &[u32], r1: &[u32]) {
+        println!("cmodexp2({}, {}, {:?}, {:?})", a, n, r0, r1);
+    }
+
+    pub fn iqft(&mut self, qb: &[u32]) {
+        println!("iqft({:?})", qb);
     }
 
     pub fn state(&self) -> Vec<State> {
