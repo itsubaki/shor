@@ -253,11 +253,11 @@ fn cr(k: i32, n: u32, control: u32, target: u32) -> Gate {
     let p = 2.0 * std::f64::consts::PI / (2.0_f64.powf(k as f64));
     let e = Complex::new(0.0, p).exp();
 
-    // apply
     for (i, v) in mat.iter_mut().enumerate() {
         let bits: BinaryChars = to_binary_chars(i, n as usize);
 
         if bits[control as usize] == '1' && bits[target as usize] == '1' {
+            // apply
             v[i] = e * v[i];
         }
     }
@@ -273,27 +273,27 @@ fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> G
 
     let mut index: Vec<usize> = vec![];
     for i in 0..mat.len() {
-        let mut bits: BinaryChars = to_binary_chars(i, nob as usize);
+        let bits: BinaryChars = to_binary_chars(i, nob as usize);
         if bits[control as usize] == '0' {
             // i -> i
             index.push(to_radix(bits));
             continue;
         }
 
-        // i -> a**2**j *k mod n
-        let mut r0bits: BinaryChars = take(&bits, 0, r0len as usize);
         let r1bits: BinaryChars = take(&bits, r0len as usize, bits.len());
         let k: usize = to_radix(r1bits);
-
-        if (k as u32) < n {
-            let a2jkmodn: u32 = (a2jmodn * k as u32) % n;
-            let mut a2jkmodns: BinaryChars = to_binary_chars(a2jkmodn as usize, r1len as usize);
-
-            r0bits.append(&mut a2jkmodns);
-            bits = r0bits;
+        if (k as u32) > n - 1 {
+            index.push(to_radix(bits));
+            continue;
         }
 
-        index.push(to_radix(bits));
+        // i -> a**2**j *k mod n
+        let a2jkmodn: u32 = (a2jmodn * k as u32) % n;
+        let mut a2jkmodns: BinaryChars = to_binary_chars(a2jkmodn as usize, r1len as usize);
+
+        let mut r0bits: BinaryChars = take(&bits, 0, r0len as usize);
+        r0bits.append(&mut a2jkmodns);
+        index.push(to_radix(r0bits));
     }
 
     let mut out: Matrix = vec![vec![]; mat.len()];
