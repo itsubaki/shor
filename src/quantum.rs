@@ -266,13 +266,12 @@ fn cr(k: i32, n: u32, control: u32, target: u32) -> Gate {
 }
 
 fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> Gate {
-    let mat: Matrix = idm(nob);
     let r0len: u32 = nob - target.len() as u32;
     let r1len: u32 = target.len() as u32;
     let a2jmodn = modexp2(a, j, n);
 
     let mut index: Vec<usize> = vec![];
-    for i in 0..mat.len() {
+    for i in 0..(2_usize.pow(nob)) {
         let bits: BinaryChars = to_binary_chars(i, nob as usize);
         if bits[control as usize] == '0' {
             // i -> i
@@ -296,6 +295,7 @@ fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> G
         index.push(to_radix(r0bits));
     }
 
+    let mat: Matrix = idm(nob);
     let mut out: Matrix = vec![vec![]; mat.len()];
     for (i, ii) in index.iter().enumerate() {
         out[i] = clone(&mat[*ii]); // :(
