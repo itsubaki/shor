@@ -16,6 +16,12 @@ pub struct State {
     pub prob: f64,
 }
 
+impl State {
+    pub fn to_binary_chars(&self) -> BinaryChars {
+        to_binary_chars(self.index, self.number_of_bit as usize)
+    }
+}
+
 impl std::fmt::Display for State {
     fn fmt(&self, dest: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
@@ -315,7 +321,7 @@ fn modexp2(a: u32, j: u32, n: u32) -> u32 {
     p
 }
 
-fn take(bin: &[char], start: usize, end: usize) -> BinaryChars {
+pub fn take(bin: &[char], start: usize, end: usize) -> BinaryChars {
     bin[start..end].to_vec()
 }
 

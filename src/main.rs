@@ -54,6 +54,6 @@ fn main() {
     qsim.iqft(&r0);
 
     for s in qsim.state().iter() {
-        println!("{}", s);
+        println!("{:?}", s.to_binary_chars());
     }
 }
