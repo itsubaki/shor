@@ -53,6 +53,23 @@ pub fn gcd(a: u32, b: u32) -> u32 {
     integer::gcd(a, b)
 }
 
+pub fn modexp2(a: u32, j: u32, n: u32) -> u32 {
+    if a == 0 {
+        return 0;
+    }
+
+    if j == 0 {
+        return a % n;
+    }
+
+    let mut p = a;
+    for _ in 0..j {
+        p = (p * p) % n
+    }
+
+    p
+}
+
 #[test]
 fn test_is_prime() {
     assert!(is_prime(2));
@@ -94,4 +111,24 @@ fn test_base_exp() {
     assert_eq!(base_exp(27), (3, 3, true));
     assert_eq!(base_exp(36), (6, 2, true));
     assert_eq!(base_exp(49), (7, 2, true));
+}
+
+#[test]
+fn test_modexp2() {
+    assert_eq!(modexp2(7, 0, 15), 7);
+    assert_eq!(modexp2(7, 1, 15), 4);
+    assert_eq!(modexp2(7, 2, 15), 1);
+    assert_eq!(modexp2(7, 3, 15), 1);
+    assert_eq!(modexp2(7, 4, 15), 1);
+    assert_eq!(modexp2(7, 5, 15), 1);
+    assert_eq!(modexp2(7, 6, 15), 1);
+    assert_eq!(modexp2(7, 7, 15), 1);
+    assert_eq!(modexp2(7, 8, 15), 1);
+    assert_eq!(modexp2(7, 9, 15), 1);
+    assert_eq!(modexp2(7, 10, 15), 1);
+    assert_eq!(modexp2(7, 11, 15), 1);
+    assert_eq!(modexp2(7, 12, 15), 1);
+    assert_eq!(modexp2(7, 13, 15), 1);
+    assert_eq!(modexp2(7, 14, 15), 1);
+    assert_eq!(modexp2(0, 15, 15), 0);
 }

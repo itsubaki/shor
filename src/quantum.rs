@@ -268,7 +268,7 @@ fn cr(k: i32, n: u32, control: u32, target: u32) -> Gate {
 fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> Gate {
     let r0len: u32 = nob - target.len() as u32;
     let r1len: u32 = target.len() as u32;
-    let a2jmodn = modexp2(a, j, n);
+    let a2jmodn = super::number::modexp2(a, j, n);
 
     let mut index: Vec<usize> = vec![];
     for i in 0..(2_usize.pow(nob)) {
@@ -304,29 +304,12 @@ fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> G
     transpose(Rc::new(out))
 }
 
-fn modexp2(a: u32, j: u32, n: u32) -> u32 {
-    if a == 0 {
-        return 0;
-    }
-
-    if j == 0 {
-        return a % n;
-    }
-
-    let mut p = a;
-    for _ in 0..j {
-        p = (p * p) % n
-    }
-
-    p
-}
-
 pub fn take(bin: &[char], start: usize, end: usize) -> BinaryChars {
     bin[start..end].to_vec()
 }
 
 fn to_binary_chars(i: usize, n: usize) -> BinaryChars {
-    return format!("{:>0n$b}", i, n = n).chars().collect();
+    format!("{:>0n$b}", i, n = n).chars().collect()
 }
 
 fn to_radix(v: BinaryChars) -> usize {
