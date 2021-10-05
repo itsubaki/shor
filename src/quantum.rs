@@ -82,20 +82,20 @@ impl Q {
     }
 
     pub fn x(&mut self, qb: &[u32]) {
-        self.apply(x(), qb)
+        self.apply_(x(), qb)
     }
 
     pub fn h(&mut self, qb: &[u32]) {
-        self.apply(h(), qb)
+        self.apply_(h(), qb)
     }
 
-    pub fn apply(&mut self, g: Gate, qb: &[u32]) {
+    pub fn apply_(&mut self, g: Gate, qb: &[u32]) {
         let list: Vec<Gate> = gate_list(self.number_of_bit(), g, qb);
         let g: Gate = tensor_(&list);
-        self.apply_(g)
+        self.apply(g)
     }
 
-    pub fn apply_(&mut self, g: Gate) {
+    pub fn apply(&mut self, g: Gate) {
         let mut v: Qubit = vec![];
 
         for i in 0..g.len() {
@@ -112,7 +112,8 @@ impl Q {
     }
 
     pub fn cmodexp2(&mut self, a: u32, n: u32, r0: &[u32], r1: &[u32]) {
-        println!("cmodexp2({}, {}, {:?}, {:?})", a, n, r0, r1);
+        let g: Gate = cmodexp2(a, n, r0, r1);
+        self.apply(g)
     }
 
     pub fn iqft(&mut self, qb: &[u32]) {
@@ -132,7 +133,7 @@ impl Q {
 
     pub fn icr(&mut self, k: i32, c: u32, t: u32) {
         let g: Gate = dagger(cr(k, c, t));
-        self.apply_(g)
+        self.apply(g)
     }
 
     pub fn state(&self) -> Vec<State> {
@@ -229,6 +230,11 @@ fn x() -> Gate {
 fn h() -> Gate {
     let e = Complex::new(1.0 / std::f64::consts::SQRT_2, 0.0);
     Rc::new(vec![vec![e, e], vec![e, -1.0 * e]])
+}
+
+fn cmodexp2(a: u32, n: u32, r0: &[u32], r1: &[u32]) -> Gate {
+    println!("cmodexp2({}, {}, {:?}, {:?})", a, n, r0, r1);
+    id()
 }
 
 fn cr(k: i32, c: u32, t: u32) -> Gate {
