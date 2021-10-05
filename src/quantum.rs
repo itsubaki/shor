@@ -47,10 +47,7 @@ impl Q {
     }
 
     pub fn zero(&mut self) -> u32 {
-        self.add(vec![
-            Complex { re: 1.0, im: 0.0 },
-            Complex { re: 0.0, im: 0.0 },
-        ])
+        self.add(vec![Complex::new(1.0, 0.0), Complex::new(0.0, 0.0)])
     }
 
     pub fn zero_with(&mut self, n: u32) -> Vec<u32> {
@@ -85,20 +82,24 @@ impl Q {
     }
 
     pub fn x(&mut self, qb: &[u32]) {
-        self.apply(x(), qb);
+        self.apply(x(), qb)
     }
 
     pub fn h(&mut self, qb: &[u32]) {
-        self.apply(h(), qb);
+        self.apply(h(), qb)
     }
 
     pub fn apply(&mut self, g: Gate, qb: &[u32]) {
-        let list: Vec<Gate> = gate_list(self.number_of_bit(), g, id(), qb);
+        let list: Vec<Gate> = gate_list(self.number_of_bit(), g, qb);
         let g: Gate = tensor_(&list);
+        self.apply_(g)
+    }
+
+    pub fn apply_(&mut self, g: Gate) {
         let mut v: Qubit = vec![];
 
         for i in 0..g.len() {
-            let mut e = Complex { re: 0.0, im: 0.0 };
+            let mut e = Complex::new(0.0, 0.0);
 
             for j in 0..g[i].len() {
                 e += g[i][j] * self.qb[j];
@@ -115,11 +116,27 @@ impl Q {
     }
 
     pub fn iqft(&mut self, qb: &[u32]) {
-        println!("iqft({:?})", qb);
+        let l: usize = qb.len();
+
+        for i in (0..l).rev() {
+            let mut k: i32 = (l as i32) - (i as i32);
+
+            for j in (i..l).rev() {
+                self.icr(k, qb[j], qb[i]);
+                k -= 1;
+            }
+
+            self.h(&[qb[i]]);
+        }
+    }
+
+    pub fn icr(&mut self, k: i32, c: u32, t: u32) {
+        let g: Gate = dagger(cr(k, c, t));
+        self.apply_(g)
     }
 
     pub fn state(&self) -> Vec<State> {
-        let z: Complex<f64> = Complex { re: 0.0, im: 0.0 };
+        let z: Complex<f64> = Complex::new(0.0, 0.0);
         let n: u32 = self.number_of_bit();
         let mut list: Vec<State> = vec![];
 
@@ -151,7 +168,7 @@ fn tensor_(list: &[Gate]) -> Gate {
 }
 
 fn tensor(m: Gate, n: Gate) -> Gate {
-    let mut g: Matrix = vec![];
+    let mut mat: Matrix = vec![];
 
     for i in 0..m.len() {
         for k in 0..n.len() {
@@ -163,14 +180,15 @@ fn tensor(m: Gate, n: Gate) -> Gate {
                 }
             }
 
-            g.push(v);
+            mat.push(v);
         }
     }
 
-    Rc::new(g)
+    Rc::new(mat)
 }
 
-fn gate_list(n: u32, g: Gate, id: Gate, qb: &[u32]) -> Vec<Gate> {
+fn gate_list(n: u32, g: Gate, qb: &[u32]) -> Vec<Gate> {
+    let identity: Gate = id();
     let mut list: Vec<Gate> = vec![];
 
     for i in 0..n {
@@ -188,7 +206,7 @@ fn gate_list(n: u32, g: Gate, id: Gate, qb: &[u32]) -> Vec<Gate> {
             continue;
         }
 
-        list.push(Rc::clone(&id));
+        list.push(Rc::clone(&identity));
     }
 
     list
@@ -196,23 +214,60 @@ fn gate_list(n: u32, g: Gate, id: Gate, qb: &[u32]) -> Vec<Gate> {
 
 fn id() -> Gate {
     Rc::new(vec![
-        vec![Complex { re: 1.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }],
-        vec![Complex { re: 0.0, im: 0.0 }, Complex { re: 1.0, im: 0.0 }],
+        vec![Complex::new(1.0, 0.0), Complex::new(0.0, 0.0)],
+        vec![Complex::new(0.0, 0.0), Complex::new(1.0, 0.0)],
     ])
 }
 
 fn x() -> Gate {
     Rc::new(vec![
-        vec![Complex { re: 0.0, im: 0.0 }, Complex { re: 1.0, im: 0.0 }],
-        vec![Complex { re: 1.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }],
+        vec![Complex::new(0.0, 0.0), Complex::new(1.0, 0.0)],
+        vec![Complex::new(1.0, 0.0), Complex::new(0.0, 0.0)],
     ])
 }
 
 fn h() -> Gate {
-    let e = Complex {
-        re: 1.0 / std::f64::consts::SQRT_2,
-        im: 0.0,
-    };
-
+    let e = Complex::new(1.0 / std::f64::consts::SQRT_2, 0.0);
     Rc::new(vec![vec![e, e], vec![e, -1.0 * e]])
+}
+
+fn cr(k: i32, c: u32, t: u32) -> Gate {
+    println!("cr({} {} {})", k, c, t);
+    id()
+}
+
+fn transpose(g: Gate) -> Gate {
+    let mut mat: Matrix = vec![];
+
+    for i in 0..g.len() {
+        let mut v: Vec<Complex<f64>> = vec![];
+
+        for j in 0..g[i].len() {
+            v.push(g[j][i])
+        }
+
+        mat.push(v);
+    }
+
+    Rc::new(mat)
+}
+
+fn conjugate(g: Gate) -> Gate {
+    let mut mat: Matrix = vec![];
+
+    for i in 0..g.len() {
+        let mut v: Vec<Complex<f64>> = vec![];
+
+        for j in 0..g[i].len() {
+            v.push(g[i][j].conj());
+        }
+
+        mat.push(v);
+    }
+
+    Rc::new(mat)
+}
+
+fn dagger(g: Gate) -> Gate {
+    transpose(conjugate(g))
 }
