@@ -112,17 +112,21 @@ impl Q {
     }
 
     pub fn cmodexp2(&mut self, a: u32, n: u32, r0: &[u32], r1: &[u32]) {
-        let g: Gate = cmodexp2(a, n, r0, r1);
-        self.apply(g)
+        let nob: u32 = self.number_of_bit();
+        for (i, c) in r0.iter().enumerate() {
+            self.apply(cmodexp2(nob, a, i as u32, n, *c, r1))
+        }
     }
 
     pub fn iqft(&mut self, qb: &[u32]) {
         let l: usize = qb.len();
 
+        // for i := l - 1; i > -1; i-- {}
         for i in (0..l).rev() {
             let mut k: i32 = (l as i32) - (i as i32);
 
-            for j in (i..l).rev() {
+            // for j := l - 1; j > i; j-- {}
+            for j in ((i + 1)..l).rev() {
                 self.icr(k, qb[j], qb[i]);
                 k -= 1;
             }
@@ -131,8 +135,9 @@ impl Q {
         }
     }
 
-    pub fn icr(&mut self, k: i32, c: u32, t: u32) {
-        let g: Gate = dagger(cr(k, c, t));
+    pub fn icr(&mut self, k: i32, control: u32, target: u32) {
+        let n: u32 = self.number_of_bit();
+        let g: Gate = dagger(cr(k, n, control, target));
         self.apply(g)
     }
 
@@ -232,14 +237,111 @@ fn h() -> Gate {
     Rc::new(vec![vec![e, e], vec![e, -1.0 * e]])
 }
 
-fn cmodexp2(a: u32, n: u32, r0: &[u32], r1: &[u32]) -> Gate {
-    println!("cmodexp2({}, {}, {:?}, {:?})", a, n, r0, r1);
-    id()
+fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> Gate {
+    let mat: Matrix = idmat(nob);
+    let r0len: u32 = nob - target.len() as u32;
+    let r1len: u32 = target.len() as u32;
+    let a2jmodn = modexp2(a, j, n);
+
+    let mut index: Vec<usize> = vec![];
+    for i in 0..mat.len() {
+        let mut bits: Vec<char> = format!("{:>0n$b}", i, n = nob as usize).chars().collect();
+
+        if bits[control as usize] == '1' {
+            let mut r0bits: Vec<char> = bits[0..r0len as usize].to_vec();
+
+            let r1bits: Vec<char> = bits[(r0len as usize)..bits.len()].to_vec();
+            let r1str: String = r1bits.iter().collect();
+            let k: usize = usize::from_str_radix(&r1str, 2).unwrap();
+
+            if (k as u32) < n {
+                let a2jkmodn: u32 = (a2jmodn * k as u32) % n;
+                let mut a2jkmodns: Vec<char> = format!("{:>0n$b}", a2jkmodn, n = r1len as usize)
+                    .chars()
+                    .collect();
+
+                r0bits.append(&mut a2jkmodns);
+                bits = r0bits;
+            }
+        }
+
+        let bitsstr: String = bits.iter().collect();
+        let v: usize = usize::from_str_radix(&bitsstr, 2).unwrap();
+        index.push(v);
+    }
+
+    let mut out: Matrix = vec![vec![]; mat.len()];
+    for (i, ii) in index.iter().enumerate() {
+        out[i] = clone(&mat[*ii]); // :(
+    }
+
+    transpose(Rc::new(out))
 }
 
-fn cr(k: i32, c: u32, t: u32) -> Gate {
-    println!("cr({} {} {})", k, c, t);
-    id()
+fn modexp2(a: u32, j: u32, n: u32) -> u32 {
+    if a == 0 {
+        return 0;
+    }
+
+    if j == 0 {
+        return a % n;
+    }
+
+    let mut p = a;
+    for _ in 0..j {
+        p = (p * p) % n
+    }
+
+    p
+}
+
+fn cr(k: i32, n: u32, control: u32, target: u32) -> Gate {
+    // identity matrix
+    let mut mat: Matrix = idmat(n);
+
+    // coefficient
+    let p = 2.0 * std::f64::consts::PI / (2.0_f64.powf(k as f64));
+    let e = Complex::new(0.0, p).exp();
+
+    // apply
+    for (i, v) in mat.iter_mut().enumerate() {
+        let bits: Vec<char> = format!("{:>0n$b}", i, n = n as usize).chars().collect();
+        if bits[control as usize] == '1' && bits[target as usize] == '1' {
+            v[i] = e * v[i];
+        }
+    }
+
+    transpose(Rc::new(mat))
+}
+
+fn idmat(n: u32) -> Matrix {
+    let mut mat: Matrix = vec![];
+
+    for i in 0..(2_i32.pow(n)) {
+        let mut v: Vec<Complex<f64>> = vec![];
+
+        for j in 0..(2_i32.pow(n)) {
+            if i == j {
+                v.push(Complex::new(1.0, 0.0));
+                continue;
+            }
+
+            v.push(Complex::new(0.0, 0.0));
+        }
+
+        mat.push(v);
+    }
+
+    mat
+}
+
+fn clone(v: &[Complex<f64>]) -> Vec<Complex<f64>> {
+    let mut out = vec![];
+    for i in v {
+        out.push(*i);
+    }
+
+    out
 }
 
 fn transpose(g: Gate) -> Gate {

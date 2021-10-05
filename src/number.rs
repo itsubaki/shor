@@ -36,7 +36,7 @@ pub fn coprime(n: u32) -> u32 {
 }
 
 pub fn base_exp(n: u32) -> (u32, u32, bool) {
-    let s = format!("{:b}", n).chars().count();
+    let s: usize = format!("{:b}", n).chars().count();
 
     for i in (2..s).rev() {
         let a: f64 = (n as f64).powf(1.0 / (i as f64));
