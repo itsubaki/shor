@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-run: fmt
+run: fmt lint
 	# N=15, a=0, t=3
 	cargo run 15 0 3
 

@@ -41,8 +41,8 @@ impl Q {
             self.qb = qb;
             return 0;
         }
-        self.tensor_vec(qb);
 
+        self.tensor_vec(qb);
         self.number_of_bit() - 1
     }
 
@@ -64,9 +64,8 @@ impl Q {
     }
 
     pub fn zero_log2(&mut self, n: u32) -> Vec<u32> {
-        let s = ((n as f64).log2() as u32) + 1;
-
-        self.zero_with(s)
+        let log2n: u32 = ((n as f64).log2() as u32) + 1;
+        self.zero_with(log2n)
     }
 
     fn tensor_vec(&mut self, qb: Qubit) {
@@ -94,9 +93,8 @@ impl Q {
     }
 
     pub fn apply(&mut self, g: Gate, qb: &[u32]) {
-        let list: Vec<Gate> = self.gate_list(g, id(), qb);
+        let list: Vec<Gate> = gate_list(self.number_of_bit(), g, id(), qb);
         let g: Gate = tensor_(&list);
-
         let mut v: Qubit = vec![];
 
         for i in 0..g.len() {
@@ -112,30 +110,6 @@ impl Q {
         self.qb = v
     }
 
-    fn gate_list(&self, g: Gate, id: Gate, qb: &[u32]) -> Vec<Gate> {
-        let mut list: Vec<Gate> = vec![];
-
-        for i in 0..self.number_of_bit() {
-            let mut found = false;
-
-            for j in qb {
-                if i == *j {
-                    found = true;
-                    break;
-                }
-            }
-
-            if found {
-                list.push(Rc::clone(&g));
-                continue;
-            }
-
-            list.push(Rc::clone(&id));
-        }
-
-        list
-    }
-
     pub fn cmodexp2(&mut self, a: u32, n: u32, r0: &[u32], r1: &[u32]) {
         println!("cmodexp2({}, {}, {:?}, {:?})", a, n, r0, r1);
     }
@@ -147,7 +121,6 @@ impl Q {
     pub fn state(&self) -> Vec<State> {
         let z: Complex<f64> = Complex { re: 0.0, im: 0.0 };
         let n: u32 = self.number_of_bit();
-
         let mut list: Vec<State> = vec![];
 
         for i in 0..self.qb.len() {
@@ -195,6 +168,30 @@ fn tensor(m: Gate, n: Gate) -> Gate {
     }
 
     Rc::new(g)
+}
+
+fn gate_list(n: u32, g: Gate, id: Gate, qb: &[u32]) -> Vec<Gate> {
+    let mut list: Vec<Gate> = vec![];
+
+    for i in 0..n {
+        let mut found = false;
+
+        for j in qb {
+            if i == *j {
+                found = true;
+                break;
+            }
+        }
+
+        if found {
+            list.push(Rc::clone(&g));
+            continue;
+        }
+
+        list.push(Rc::clone(&id));
+    }
+
+    list
 }
 
 fn id() -> Gate {
