@@ -7,6 +7,8 @@ pub type Gate = Rc<Matrix>;
 
 pub type Matrix = Vec<Vec<Complex<f64>>>;
 
+pub type BinaryChars = Vec<char>;
+
 pub struct State {
     number_of_bit: u32,
     pub index: usize,
@@ -237,37 +239,55 @@ fn h() -> Gate {
     Rc::new(vec![vec![e, e], vec![e, -1.0 * e]])
 }
 
+fn cr(k: i32, n: u32, control: u32, target: u32) -> Gate {
+    // identity matrix
+    let mut mat: Matrix = idm(n);
+
+    // coefficient
+    let p = 2.0 * std::f64::consts::PI / (2.0_f64.powf(k as f64));
+    let e = Complex::new(0.0, p).exp();
+
+    // apply
+    for (i, v) in mat.iter_mut().enumerate() {
+        let bits: BinaryChars = to_binary_chars(i, n as usize);
+
+        if bits[control as usize] == '1' && bits[target as usize] == '1' {
+            v[i] = e * v[i];
+        }
+    }
+
+    transpose(Rc::new(mat))
+}
+
 fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> Gate {
-    let mat: Matrix = idmat(nob);
+    let mat: Matrix = idm(nob);
     let r0len: u32 = nob - target.len() as u32;
     let r1len: u32 = target.len() as u32;
     let a2jmodn = modexp2(a, j, n);
 
     let mut index: Vec<usize> = vec![];
     for i in 0..mat.len() {
-        let mut bits: Vec<char> = format!("{:>0n$b}", i, n = nob as usize).chars().collect();
-
-        if bits[control as usize] == '1' {
-            let mut r0bits: Vec<char> = bits[0..r0len as usize].to_vec();
-
-            let r1bits: Vec<char> = bits[(r0len as usize)..bits.len()].to_vec();
-            let r1str: String = r1bits.iter().collect();
-            let k: usize = usize::from_str_radix(&r1str, 2).unwrap();
-
-            if (k as u32) < n {
-                let a2jkmodn: u32 = (a2jmodn * k as u32) % n;
-                let mut a2jkmodns: Vec<char> = format!("{:>0n$b}", a2jkmodn, n = r1len as usize)
-                    .chars()
-                    .collect();
-
-                r0bits.append(&mut a2jkmodns);
-                bits = r0bits;
-            }
+        let mut bits: BinaryChars = to_binary_chars(i, nob as usize);
+        if bits[control as usize] == '0' {
+            // i -> i
+            index.push(to_radix(bits));
+            continue;
         }
 
-        let bitsstr: String = bits.iter().collect();
-        let v: usize = usize::from_str_radix(&bitsstr, 2).unwrap();
-        index.push(v);
+        // i -> a**2**j *k mod n
+        let mut r0bits: BinaryChars = take(&bits, 0, r0len as usize);
+        let r1bits: BinaryChars = take(&bits, r0len as usize, bits.len());
+        let k: usize = to_radix(r1bits);
+
+        if (k as u32) < n {
+            let a2jkmodn: u32 = (a2jmodn * k as u32) % n;
+            let mut a2jkmodns: BinaryChars = to_binary_chars(a2jkmodn as usize, r1len as usize);
+
+            r0bits.append(&mut a2jkmodns);
+            bits = r0bits;
+        }
+
+        index.push(to_radix(bits));
     }
 
     let mut out: Matrix = vec![vec![]; mat.len()];
@@ -295,26 +315,20 @@ fn modexp2(a: u32, j: u32, n: u32) -> u32 {
     p
 }
 
-fn cr(k: i32, n: u32, control: u32, target: u32) -> Gate {
-    // identity matrix
-    let mut mat: Matrix = idmat(n);
-
-    // coefficient
-    let p = 2.0 * std::f64::consts::PI / (2.0_f64.powf(k as f64));
-    let e = Complex::new(0.0, p).exp();
-
-    // apply
-    for (i, v) in mat.iter_mut().enumerate() {
-        let bits: Vec<char> = format!("{:>0n$b}", i, n = n as usize).chars().collect();
-        if bits[control as usize] == '1' && bits[target as usize] == '1' {
-            v[i] = e * v[i];
-        }
-    }
-
-    transpose(Rc::new(mat))
+fn take(bin: &[char], start: usize, end: usize) -> BinaryChars {
+    bin[start..end].to_vec()
 }
 
-fn idmat(n: u32) -> Matrix {
+fn to_binary_chars(i: usize, n: usize) -> BinaryChars {
+    return format!("{:>0n$b}", i, n = n).chars().collect();
+}
+
+fn to_radix(v: BinaryChars) -> usize {
+    let s: String = v.iter().collect();
+    usize::from_str_radix(&s, 2).unwrap()
+}
+
+fn idm(n: u32) -> Matrix {
     let mut mat: Matrix = vec![];
 
     for i in 0..(2_i32.pow(n)) {
