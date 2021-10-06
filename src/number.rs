@@ -87,6 +87,39 @@ pub fn continued_fraction(f: f64) -> Vec<u32> {
     list
 }
 
+// func Convergent(cfx []int) (int, int, float64) {
+// 	l := len(cfx)
+// 	if l == 1 {
+// 		return cfx[0], 1, float64(cfx[0])
+// 	}
+
+// 	s, r := 1, cfx[l-1]
+// 	for i := 2; i < l; i++ {
+// 		s, r = r, cfx[l-i]*r+s
+// 	}
+// 	s = s + cfx[0]*r
+
+// 	return s, r, float64(s) / float64(r)
+// }
+
+pub fn convergent(cf: &[u32]) -> (u32, u32, f64) {
+    let len: usize = cf.len();
+    if len == 1 {
+        return (cf[0], 1, cf[0] as f64);
+    }
+
+    let mut s: u32 = 1;
+    let mut r: u32 = cf[len - 1];
+    for i in 2..len {
+        let tmp = s;
+        s = r;
+        r = cf[len - i] * r + tmp;
+    }
+    s += cf[0] * r;
+
+    (s, r, (s as f64 / r as f64))
+}
+
 #[test]
 fn test_is_prime() {
     assert!(is_prime(2));
@@ -159,4 +192,30 @@ fn test_continued_fraction() {
     assert_eq!(continued_fraction(13.0 / 16.0), [0, 1, 4, 3]);
     assert_eq!(continued_fraction(0.42857), [0, 2, 2, 1]);
     assert_eq!(continued_fraction(0.166656494140625), [0, 6]);
+}
+
+// {1.0 / 16.0, []int{0, 16}, 1, 16, 0.0625, 1e-3},
+// {4.0 / 16.0, []int{0, 4}, 1, 4, 0.25, 1e-3},
+// {7.0 / 16.0, []int{0, 2, 3, 1, 1}, 7, 16, 0.4375, 1e-3},
+// {13.0 / 16.0, []int{0, 1, 4, 3}, 13, 16, 0.8125, 1e-3},
+// {0.42857, []int{0, 2, 2, 1}, 3, 7, 0.42857142857142855, 1e-3},
+// {0.166656494140625, []int{0, 6}, 1, 6, 0.16666666666666666, 1e-3},
+
+#[test]
+fn test_convergent() {
+    assert_eq!(convergent(&continued_fraction(1.0 / 16.0)), (1, 16, 0.0625));
+    assert_eq!(convergent(&continued_fraction(4.0 / 16.0)), (1, 4, 0.25));
+    assert_eq!(convergent(&continued_fraction(7.0 / 16.0)), (7, 16, 0.4375));
+    assert_eq!(
+        convergent(&continued_fraction(13.0 / 16.0)),
+        (13, 16, 0.8125)
+    );
+    assert_eq!(
+        convergent(&continued_fraction(0.42857)),
+        (3, 7, 0.42857142857142855)
+    );
+    assert_eq!(
+        convergent(&continued_fraction(0.166656494140625)),
+        (1, 6, 0.16666666666666666)
+    );
 }
