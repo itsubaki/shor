@@ -68,6 +68,25 @@ pub fn modexp2(a: u32, j: u32, n: u32) -> u32 {
     p
 }
 
+pub fn continued_fraction(f: f64) -> Vec<u32> {
+    let mut list: Vec<u32> = vec![];
+    let mut r: f64 = f;
+
+    loop {
+        let t: f64 = r.trunc();
+        list.push(t as u32);
+
+        let diff: f64 = r - t;
+        if diff < 1e-3 {
+            break;
+        }
+
+        r = 1.0 / diff;
+    }
+
+    list
+}
+
 #[test]
 fn test_is_prime() {
     assert!(is_prime(2));
@@ -129,4 +148,15 @@ fn test_modexp2() {
     assert_eq!(modexp2(7, 13, 15), 1);
     assert_eq!(modexp2(7, 14, 15), 1);
     assert_eq!(modexp2(0, 15, 15), 0);
+}
+
+#[test]
+fn test_continued_fraction() {
+    assert_eq!(continued_fraction(0.0), [0]);
+    assert_eq!(continued_fraction(1.0 / 16.0), [0, 16]);
+    assert_eq!(continued_fraction(4.0 / 16.0), [0, 4]);
+    assert_eq!(continued_fraction(7.0 / 16.0), [0, 2, 3, 1, 1]);
+    assert_eq!(continued_fraction(13.0 / 16.0), [0, 1, 4, 3]);
+    assert_eq!(continued_fraction(0.42857), [0, 2, 2, 1]);
+    assert_eq!(continued_fraction(0.166656494140625), [0, 6]);
 }
