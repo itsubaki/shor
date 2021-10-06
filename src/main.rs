@@ -59,7 +59,7 @@ fn main() {
         let (m0, _) = bin.split_at(r0.len());
 
         let (_s, _r, ok) = number::find_order(a, n, m0);
-        if !ok || _r % 2 != 0 {
+        if !ok || number::is_odd(_r) {
             continue;
         }
 

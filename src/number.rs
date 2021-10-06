@@ -143,19 +143,16 @@ pub fn find_order(a: u32, n: u32, bin: &[char]) -> (u32, u32, bool) {
 
     let fv: f64 = to_float(bin);
     let cf: Vec<u32> = continued_fraction(fv);
-    let (mut s, mut r) = convergent(&cf[0..1]);
 
     for i in 0..cf.len() {
-        let (_s, _r) = convergent(&cf[0..(i + 1)]);
+        let (s, r) = convergent(&cf[0..(i + 1)]);
 
-        if modexp(a, _r, n) == 1 {
-            return (_s, _r, true);
+        if modexp(a, r, n) == 1 {
+            return (s, r, true);
         }
-
-        s = _s;
-        r = _r;
     }
 
+    let (s, r) = convergent(&cf);
     (s, r, false)
 }
 
@@ -164,6 +161,14 @@ pub fn is_trivial(n: u32, factor: &[u32]) -> bool {
         if 1 < *p && *p < n && n % p == 0 {
             return false;
         }
+    }
+
+    true
+}
+
+pub fn is_odd(n: u32) -> bool {
+    if n % 2 == 0 {
+        return false;
     }
 
     true

@@ -23,7 +23,7 @@ fmt:
 check:
 	cargo check
 
-install: lint fmt
+install: fmt lint
 	cargo install --path .
 
 rustup:
