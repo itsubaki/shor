@@ -54,10 +54,9 @@ fn main() {
     qsim.iqft(&r0);
 
     for s in qsim.state().iter() {
-        println!("{:?}", s.to_binary_chars().split_at(r0.len()));
-    }
+        let bin = s.to_binary_chars();
+        let (m0, _) = bin.split_at(r0.len());
 
-    for s in qsim.state().iter() {
-        println!("{}", s);
+        println!("{} {:?} {}", s, m0, quantum::to_float(m0));
     }
 }

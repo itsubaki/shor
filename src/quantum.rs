@@ -108,7 +108,6 @@ impl Q {
 
         for i in 0..g.len() {
             let mut e = Complex::new(0.0, 0.0);
-
             for j in 0..g[i].len() {
                 e += g[i][j] * self.qb[j];
             }
@@ -151,7 +150,7 @@ impl Q {
 
     pub fn state(&self) -> Vec<State> {
         let z: Complex<f64> = Complex::new(0.0, 0.0);
-        let n: u32 = self.number_of_bit();
+        let nob: u32 = self.number_of_bit();
         let mut list: Vec<State> = vec![];
 
         for i in 0..self.qb.len() {
@@ -160,7 +159,7 @@ impl Q {
             }
 
             list.push(State {
-                number_of_bit: n,
+                number_of_bit: nob,
                 index: i,
                 amp: self.qb[i],
                 prob: self.qb[i].norm().powf(2.0),
@@ -201,11 +200,11 @@ fn tensor(m: Gate, n: Gate) -> Gate {
     Rc::new(mat)
 }
 
-fn gate_list(n: u32, g: Gate, qb: &[u32]) -> Vec<Gate> {
+fn gate_list(nob: u32, g: Gate, qb: &[u32]) -> Vec<Gate> {
     let identity: Gate = id();
     let mut list: Vec<Gate> = vec![];
 
-    for i in 0..n {
+    for i in 0..nob {
         let mut found = false;
 
         for j in qb {
@@ -245,17 +244,16 @@ fn h() -> Gate {
     Rc::new(vec![vec![e, e], vec![e, -1.0 * e]])
 }
 
-fn cr(k: i32, n: u32, control: u32, target: u32) -> Gate {
+fn cr(k: i32, nob: u32, control: u32, target: u32) -> Gate {
     // identity matrix
-    let mut mat: Matrix = idm(n);
+    let mut mat: Matrix = idm(nob);
 
     // coefficient
     let p = 2.0 * std::f64::consts::PI / (2.0_f64.powf(k as f64));
     let e = Complex::new(0.0, p).exp();
 
     for (i, v) in mat.iter_mut().enumerate() {
-        let bits: BinaryChars = to_binary_chars(i, n as usize);
-
+        let bits: BinaryChars = to_binary_chars(i, nob as usize);
         if bits[control as usize] == '1' && bits[target as usize] == '1' {
             // apply
             v[i] = e * v[i];
@@ -275,14 +273,15 @@ fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> G
         let bits: BinaryChars = to_binary_chars(i, nob as usize);
         if bits[control as usize] == '0' {
             // i -> i
-            index.push(to_radix(bits));
+            index.push(to_decimal(&bits));
             continue;
         }
 
         let r1bits: BinaryChars = take(&bits, r0len as usize, bits.len());
-        let k: usize = to_radix(r1bits);
+        let k: usize = to_decimal(&r1bits);
         if (k as u32) > n - 1 {
-            index.push(to_radix(bits));
+            // i -> i
+            index.push(to_decimal(&bits));
             continue;
         }
 
@@ -292,7 +291,7 @@ fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> G
 
         let mut r0bits: BinaryChars = take(&bits, 0, r0len as usize);
         r0bits.append(&mut a2jkmodns);
-        index.push(to_radix(r0bits));
+        index.push(to_decimal(&r0bits));
     }
 
     let mat: Matrix = idm(nob);
@@ -308,22 +307,36 @@ pub fn take(bin: &[char], start: usize, end: usize) -> BinaryChars {
     bin[start..end].to_vec()
 }
 
-fn to_binary_chars(i: usize, n: usize) -> BinaryChars {
-    format!("{:>0n$b}", i, n = n).chars().collect()
+fn to_binary_chars(i: usize, nob: usize) -> BinaryChars {
+    format!("{:>0n$b}", i, n = nob).chars().collect()
 }
 
-fn to_radix(v: BinaryChars) -> usize {
+fn to_decimal(v: &[char]) -> usize {
     let s: String = v.iter().collect();
     usize::from_str_radix(&s, 2).unwrap()
 }
 
-fn idm(n: u32) -> Matrix {
+pub fn to_float(bin: &[char]) -> f64 {
+    let mut f: f64 = 0.0;
+
+    for (i, b) in bin.iter().enumerate() {
+        if *b == '0' {
+            continue;
+        }
+
+        f += 0.5_f64.powf((i + 1) as f64);
+    }
+
+    f
+}
+
+fn idm(nob: u32) -> Matrix {
     let mut mat: Matrix = vec![];
 
-    for i in 0..(2_i32.pow(n)) {
+    for i in 0..(2_i32.pow(nob)) {
         let mut v: Vec<Complex<f64>> = vec![];
 
-        for j in 0..(2_i32.pow(n)) {
+        for j in 0..(2_i32.pow(nob)) {
             if i == j {
                 v.push(Complex::new(1.0, 0.0));
                 continue;
@@ -339,7 +352,7 @@ fn idm(n: u32) -> Matrix {
 }
 
 fn clone(v: &[Complex<f64>]) -> Vec<Complex<f64>> {
-    let mut out = vec![];
+    let mut out: Vec<Complex<f64>> = vec![];
     for i in v {
         out.push(*i);
     }

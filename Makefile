@@ -4,7 +4,7 @@ run: lint
 	# N=15, a=0, t=3
 	cargo run 15 0 3
 
-test: fmt
+test: lint
 	cargo test
 
 lint: fmt
