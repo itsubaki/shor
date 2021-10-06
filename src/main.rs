@@ -42,7 +42,7 @@ fn main() {
         return;
     }
 
-    println!("N: {}, a: {}, t: {}", n, a, t);
+    println!("N: {} (a: {}, t: {})", n, a, t);
 
     let mut qsim = quantum::Q::new();
     let r0 = qsim.zero_with(t);
