@@ -51,6 +51,23 @@ pub fn gcd(a: u32, b: u32) -> u32 {
     integer::gcd(a, b)
 }
 
+pub fn modexp(a: u32, r: u32, n: u32) -> u32 {
+    if a == 0 {
+        return 0;
+    }
+
+    if r == 0 {
+        return 1;
+    }
+
+    let mut p = a;
+    for _ in 1..r {
+        p = (p * a) % n
+    }
+
+    p
+}
+
 pub fn modexp2(a: u32, j: u32, n: u32) -> u32 {
     if a == 0 {
         return 0;
@@ -87,21 +104,6 @@ pub fn continued_fraction(f: f64) -> Vec<u32> {
     list
 }
 
-// func Convergent(cfx []int) (int, int, float64) {
-// 	l := len(cfx)
-// 	if l == 1 {
-// 		return cfx[0], 1, float64(cfx[0])
-// 	}
-
-// 	s, r := 1, cfx[l-1]
-// 	for i := 2; i < l; i++ {
-// 		s, r = r, cfx[l-i]*r+s
-// 	}
-// 	s = s + cfx[0]*r
-
-// 	return s, r, float64(s) / float64(r)
-// }
-
 pub fn convergent(cf: &[u32]) -> (u32, u32, f64) {
     let len: usize = cf.len();
     if len == 1 {
@@ -118,6 +120,44 @@ pub fn convergent(cf: &[u32]) -> (u32, u32, f64) {
     s += cf[0] * r;
 
     (s, r, (s as f64 / r as f64))
+}
+
+pub fn to_float(bin: &[char]) -> f64 {
+    let mut f: f64 = 0.0;
+
+    for (i, b) in bin.iter().enumerate() {
+        if *b == '0' {
+            continue;
+        }
+
+        f += 0.5_f64.powf((i + 1) as f64);
+    }
+
+    f
+}
+
+pub fn find_order(a: u32, n: u32, bin: &[char]) -> (u32, u32, f64, bool) {
+    if bin.is_empty() {
+        return (0, 1, 0.0, false);
+    }
+
+    let f: f64 = to_float(bin);
+    let cf: Vec<u32> = continued_fraction(f);
+    let (mut s, mut r, mut d) = convergent(&cf[0..1]);
+
+    for i in 1..cf.len() {
+        let (_s, _r, _d) = convergent(&cf[0..(i + 1)]);
+
+        if modexp(a, _r, n) == 1 {
+            return (_s, _r, _d, true);
+        }
+
+        s = _s;
+        r = _r;
+        d = _d;
+    }
+
+    (s, r, d, false)
 }
 
 #[test]
@@ -194,13 +234,6 @@ fn test_continued_fraction() {
     assert_eq!(continued_fraction(0.166656494140625), [0, 6]);
 }
 
-// {1.0 / 16.0, []int{0, 16}, 1, 16, 0.0625, 1e-3},
-// {4.0 / 16.0, []int{0, 4}, 1, 4, 0.25, 1e-3},
-// {7.0 / 16.0, []int{0, 2, 3, 1, 1}, 7, 16, 0.4375, 1e-3},
-// {13.0 / 16.0, []int{0, 1, 4, 3}, 13, 16, 0.8125, 1e-3},
-// {0.42857, []int{0, 2, 2, 1}, 3, 7, 0.42857142857142855, 1e-3},
-// {0.166656494140625, []int{0, 6}, 1, 6, 0.16666666666666666, 1e-3},
-
 #[test]
 fn test_convergent() {
     assert_eq!(convergent(&continued_fraction(1.0 / 16.0)), (1, 16, 0.0625));
@@ -218,4 +251,11 @@ fn test_convergent() {
         convergent(&continued_fraction(0.166656494140625)),
         (1, 6, 0.16666666666666666)
     );
+}
+
+#[test]
+fn test_find_order() {
+    assert_eq!(find_order(7, 15, &['0', '1', '0']), (1, 4, 0.25, true));
+    assert_eq!(find_order(7, 15, &['1', '0', '0']), (1, 2, 0.50, false));
+    assert_eq!(find_order(7, 15, &['1', '1', '0']), (3, 4, 0.75, true));
 }

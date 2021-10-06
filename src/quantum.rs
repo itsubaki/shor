@@ -316,20 +316,6 @@ fn to_decimal(v: &[char]) -> usize {
     usize::from_str_radix(&s, 2).unwrap()
 }
 
-pub fn to_float(bin: &[char]) -> f64 {
-    let mut f: f64 = 0.0;
-
-    for (i, b) in bin.iter().enumerate() {
-        if *b == '0' {
-            continue;
-        }
-
-        f += 0.5_f64.powf((i + 1) as f64);
-    }
-
-    f
-}
-
 fn idm(nob: u32) -> Matrix {
     let mut mat: Matrix = vec![];
 

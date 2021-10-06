@@ -57,6 +57,6 @@ fn main() {
         let bin = s.to_binary_chars();
         let (m0, _) = bin.split_at(r0.len());
 
-        println!("{} {:?} {}", s, m0, quantum::to_float(m0));
+        println!("{} {:?} {}", s, m0, number::to_float(m0));
     }
 }
