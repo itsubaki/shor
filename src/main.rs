@@ -55,7 +55,7 @@ fn main() {
 
     let mut rate: f64 = 0.0;
     for state in qsim.state().iter() {
-        let bin = state.to_binary_chars();
+        let bin: Vec<char> = state.to_binary_chars();
         let (m0, _) = bin.split_at(r0.len());
 
         let (_s, _r, ok) = number::find_order(a, n, m0);
