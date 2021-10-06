@@ -53,10 +53,33 @@ fn main() {
     qsim.cmodexp2(a, n, &r0, &r1);
     qsim.iqft(&r0);
 
-    for s in qsim.state().iter() {
-        let bin = s.to_binary_chars();
+    let mut rate: f64 = 0.0;
+    for state in qsim.state().iter() {
+        let bin = state.to_binary_chars();
         let (m0, _) = bin.split_at(r0.len());
 
-        println!("{} {:?} {}", s, m0, number::to_float(m0));
+        let (_s, _r, ok) = number::find_order(a, n, m0);
+        if !ok || _r % 2 != 0 {
+            continue;
+        }
+
+        let p0: u32 = number::gcd(a.pow(_r / 2) - 1, n);
+        let p1: u32 = number::gcd(a.pow(_r / 2) + 1, n);
+
+        if number::is_trivial(n, &[p0, p1]) {
+            continue;
+        }
+
+        println!(
+            "p={}, q={}; {} {:?}",
+            p0,
+            p1,
+            state,
+            number::find_order(a, n, m0),
+        );
+
+        rate += state.prob;
     }
+
+    println!("success rate: {}", rate);
 }

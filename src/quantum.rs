@@ -26,9 +26,10 @@ impl std::fmt::Display for State {
     fn fmt(&self, dest: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             dest,
-            "{:>0n$b} {:>.4} {:>.4}",
+            "{:>0n$b} {:>+.4} {:>+.4} {:>.4}",
             self.index,
-            self.amp,
+            self.amp.re,
+            self.amp.im,
             self.prob,
             n = self.number_of_bit as usize,
         )

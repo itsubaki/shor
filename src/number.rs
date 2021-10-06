@@ -136,28 +136,37 @@ pub fn to_float(bin: &[char]) -> f64 {
     f
 }
 
-pub fn find_order(a: u32, n: u32, bin: &[char]) -> (u32, u32, f64, bool) {
+pub fn find_order(a: u32, n: u32, bin: &[char]) -> (u32, u32, bool) {
     if bin.is_empty() {
-        return (0, 1, 0.0, false);
+        return (0, 1, false);
     }
 
-    let f: f64 = to_float(bin);
-    let cf: Vec<u32> = continued_fraction(f);
-    let (mut s, mut r, mut d) = convergent(&cf[0..1]);
+    let fv: f64 = to_float(bin);
+    let cf: Vec<u32> = continued_fraction(fv);
+    let (mut s, mut r, _) = convergent(&cf[0..1]);
 
     for i in 1..cf.len() {
-        let (_s, _r, _d) = convergent(&cf[0..(i + 1)]);
+        let (_s, _r, _) = convergent(&cf[0..(i + 1)]);
 
         if modexp(a, _r, n) == 1 {
-            return (_s, _r, _d, true);
+            return (_s, _r, true);
         }
 
         s = _s;
         r = _r;
-        d = _d;
     }
 
-    (s, r, d, false)
+    (s, r, false)
+}
+
+pub fn is_trivial(n: u32, factor: &[u32]) -> bool {
+    for (_, p) in factor.iter().enumerate() {
+        if 1 < *p && *p < n && n % p == 0 {
+            return false;
+        }
+    }
+
+    true
 }
 
 #[test]
@@ -255,7 +264,7 @@ fn test_convergent() {
 
 #[test]
 fn test_find_order() {
-    assert_eq!(find_order(7, 15, &['0', '1', '0']), (1, 4, 0.25, true));
-    assert_eq!(find_order(7, 15, &['1', '0', '0']), (1, 2, 0.50, false));
-    assert_eq!(find_order(7, 15, &['1', '1', '0']), (3, 4, 0.75, true));
+    assert_eq!(find_order(7, 15, &['0', '1', '0']), (1, 4, true));
+    assert_eq!(find_order(7, 15, &['1', '0', '0']), (1, 2, false));
+    assert_eq!(find_order(7, 15, &['1', '1', '0']), (3, 4, true));
 }

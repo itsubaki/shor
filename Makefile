@@ -1,16 +1,16 @@
 SHELL := /bin/bash
 
-run: lint
+run:
 	# N=15, a=0, t=3
 	cargo run 15 0 3
 
-test: lint
+test: fmt lint
 	cargo test
 
-lint: fmt
+lint:
 	cargo clippy
 
-build: fmt check
+build: fmt lint check
 	cargo build
 
 update:
@@ -23,7 +23,7 @@ fmt:
 check:
 	cargo check
 
-install:
+install: lint fmt
 	cargo install --path .
 
 rustup:
