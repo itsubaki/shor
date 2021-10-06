@@ -70,14 +70,7 @@ fn main() {
             continue;
         }
 
-        println!(
-            "p={}, q={}; {} {:?}",
-            p0,
-            p1,
-            state,
-            number::find_order(a, n, m0),
-        );
-
+        println!("p={}, q={}; {} s/r={:>2}/{:>2}", p0, p1, state, _s, _r);
         rate += state.prob;
     }
 

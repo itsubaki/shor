@@ -104,10 +104,10 @@ pub fn continued_fraction(f: f64) -> Vec<u32> {
     list
 }
 
-pub fn convergent(cf: &[u32]) -> (u32, u32, f64) {
+pub fn convergent(cf: &[u32]) -> (u32, u32) {
     let len: usize = cf.len();
     if len == 1 {
-        return (cf[0], 1, cf[0] as f64);
+        return (cf[0], 1);
     }
 
     let mut s: u32 = 1;
@@ -119,7 +119,7 @@ pub fn convergent(cf: &[u32]) -> (u32, u32, f64) {
     }
     s += cf[0] * r;
 
-    (s, r, (s as f64 / r as f64))
+    (s, r)
 }
 
 pub fn to_float(bin: &[char]) -> f64 {
@@ -143,10 +143,10 @@ pub fn find_order(a: u32, n: u32, bin: &[char]) -> (u32, u32, bool) {
 
     let fv: f64 = to_float(bin);
     let cf: Vec<u32> = continued_fraction(fv);
-    let (mut s, mut r, _) = convergent(&cf[0..1]);
+    let (mut s, mut r) = convergent(&cf[0..1]);
 
     for i in 1..cf.len() {
-        let (_s, _r, _) = convergent(&cf[0..(i + 1)]);
+        let (_s, _r) = convergent(&cf[0..(i + 1)]);
 
         if modexp(a, _r, n) == 1 {
             return (_s, _r, true);
@@ -245,21 +245,12 @@ fn test_continued_fraction() {
 
 #[test]
 fn test_convergent() {
-    assert_eq!(convergent(&continued_fraction(1.0 / 16.0)), (1, 16, 0.0625));
-    assert_eq!(convergent(&continued_fraction(4.0 / 16.0)), (1, 4, 0.25));
-    assert_eq!(convergent(&continued_fraction(7.0 / 16.0)), (7, 16, 0.4375));
-    assert_eq!(
-        convergent(&continued_fraction(13.0 / 16.0)),
-        (13, 16, 0.8125)
-    );
-    assert_eq!(
-        convergent(&continued_fraction(0.42857)),
-        (3, 7, 0.42857142857142855)
-    );
-    assert_eq!(
-        convergent(&continued_fraction(0.166656494140625)),
-        (1, 6, 0.16666666666666666)
-    );
+    assert_eq!(convergent(&continued_fraction(1.0 / 16.0)), (1, 16));
+    assert_eq!(convergent(&continued_fraction(4.0 / 16.0)), (1, 4));
+    assert_eq!(convergent(&continued_fraction(7.0 / 16.0)), (7, 16));
+    assert_eq!(convergent(&continued_fraction(13.0 / 16.0)), (13, 16));
+    assert_eq!(convergent(&continued_fraction(0.42857)), (3, 7));
+    assert_eq!(convergent(&continued_fraction(0.166656494140625)), (1, 6));
 }
 
 #[test]
