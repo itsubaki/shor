@@ -145,7 +145,7 @@ pub fn find_order(a: u32, n: u32, bin: &[char]) -> (u32, u32, bool) {
     let cf: Vec<u32> = continued_fraction(fv);
     let (mut s, mut r) = convergent(&cf[0..1]);
 
-    for i in 1..cf.len() {
+    for i in 0..cf.len() {
         let (_s, _r) = convergent(&cf[0..(i + 1)]);
 
         if modexp(a, _r, n) == 1 {
