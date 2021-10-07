@@ -98,7 +98,7 @@ impl Q {
         self.apply_(h(), qb)
     }
 
-    pub fn apply_(&mut self, g: Gate, qb: &[u32]) {
+    fn apply_(&mut self, g: Gate, qb: &[u32]) {
         let list: Vec<Gate> = gate_list(self.number_of_bit(), g, qb);
         let g: Gate = tensor_(&list);
         self.apply(g)
@@ -304,7 +304,7 @@ fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> G
     transpose(Rc::new(out))
 }
 
-pub fn take(bin: &[char], start: usize, end: usize) -> BinaryChars {
+fn take(bin: &[char], start: usize, end: usize) -> BinaryChars {
     bin[start..end].to_vec()
 }
 
