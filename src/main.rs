@@ -1,11 +1,20 @@
 mod number;
 mod quantum;
 
+// cargo run 15 7 3
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let n: u32 = args[1].parse().unwrap(); // positive integer
-    let t: u32 = args[3].parse().unwrap(); // precision bits
-    let mut a: u32 = args[2].parse().unwrap(); // coprime number of n
+    let mut t: u32 = 3; // precision bits
+    let mut a: u32 = 0; // coprime number of n
+
+    if args.len() > 2 {
+        a = args[2].parse().unwrap();
+    }
+
+    if args.len() > 3 {
+        t = args[3].parse().unwrap();
+    }
 
     if n < 2 {
         println!("N={}. N must be greater than 1.", n);
