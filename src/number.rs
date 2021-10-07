@@ -35,12 +35,12 @@ pub fn coprime(n: u32) -> u32 {
 }
 
 pub fn base_exp(n: u32) -> (u32, u32, bool) {
-    let s: usize = format!("{:b}", n).chars().count();
+    let s: u32 = format!("{:b}", n).chars().count() as u32;
 
     for i in (2..s).rev() {
-        let a: f64 = (n as f64).powf(1.0 / (i as f64));
-        if (a as u32).pow(i as u32) == n {
-            return (a as u32, i as u32, true);
+        let a: u32 = (n as f64).powf(1.0 / (i as f64)).round() as u32;
+        if a.pow(i) == n {
+            return (a, i, true);
         }
     }
 
