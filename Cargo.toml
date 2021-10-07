@@ -3,7 +3,7 @@ name = "shor"
 version = "1.0.0"
 license = "MIT"
 authors = ["itsubaki"]
-description = "Shor's factoring algorithm"
+description = "Shor's factoring algorithm written in rust"
 edition = "2018"
 
 [dependencies]
