@@ -2,6 +2,7 @@
 name = "shor"
 version = "1.0.0"
 license = "MIT"
+authors = ["itsubaki"]
 description = "Shor's factoring algorithm"
 edition = "2018"
 
