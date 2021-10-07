@@ -5,8 +5,8 @@ mod quantum;
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let n: u32 = args[1].parse().unwrap(); // positive integer
-    let mut t: u32 = 3; // precision bits
     let mut a: u32 = 0; // coprime number of n
+    let mut t: u32 = 3; // precision bits
 
     if args.len() > 2 {
         a = args[2].parse().unwrap();
