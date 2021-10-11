@@ -53,10 +53,9 @@ fn main() {
 
         let mut rate: f64 = 0.0;
         for state in qsim.state().iter() {
-            let bin: Vec<char> = state.to_binary_chars();
-            let (m0, _) = bin.split_at(r0.len());
+            let m0: Vec<char> = state.to_binary_chars(&r0);
 
-            let (_s, _r, ok) = number::find_order(a, n, m0);
+            let (_s, _r, ok) = number::find_order(a, n, &m0);
             if !ok || number::is_odd(_r) {
                 continue;
             }

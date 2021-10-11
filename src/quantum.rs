@@ -17,8 +17,15 @@ pub struct State {
 }
 
 impl State {
-    pub fn to_binary_chars(&self) -> BinaryChars {
-        to_binary_chars(self.index, self.number_of_bit as usize)
+    pub fn to_binary_chars(&self, qb: &[u32]) -> BinaryChars {
+        let v: Vec<char> = to_binary_chars(self.index, self.number_of_bit as usize);
+
+        let mut out: Vec<char> = vec![];
+        for i in qb {
+            out.push(v[*i as usize]);
+        }
+
+        out
     }
 }
 
@@ -247,7 +254,7 @@ fn h() -> Gate {
 
 fn cr(k: i32, nob: u32, control: u32, target: u32) -> Gate {
     // identity matrix
-    let mut mat: Matrix = idm(nob);
+    let mut mat: Matrix = idmat(nob);
 
     // coefficient
     let p = 2.0 * std::f64::consts::PI / (2.0_f64.powf(k as f64));
@@ -295,7 +302,7 @@ fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> G
         index.push(to_decimal(&r0bits));
     }
 
-    let mat: Matrix = idm(nob);
+    let mat: Matrix = idmat(nob);
     let mut out: Matrix = vec![vec![]; mat.len()];
     for (i, ii) in index.iter().enumerate() {
         out[i] = clone(&mat[*ii]); // :(
@@ -317,7 +324,7 @@ fn to_decimal(v: &[char]) -> usize {
     usize::from_str_radix(&s, 2).unwrap()
 }
 
-fn idm(nob: u32) -> Matrix {
+fn idmat(nob: u32) -> Matrix {
     let mut mat: Matrix = vec![];
 
     for i in 0..(2_i32.pow(nob)) {
