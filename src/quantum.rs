@@ -313,7 +313,7 @@ fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> G
 }
 
 fn round(c: Complex<f64>) -> Complex<f64> {
-    let mut out: Complex<f64> = c.clone();
+    let mut out: Complex<f64> = c;
     if c.re.abs() < 1e-13 {
         out.re = 0.0;
     }
