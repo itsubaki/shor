@@ -441,5 +441,6 @@ fn test_is_eigen_vector() {
         None => panic!("0001 not found"),
     };
 
-    assert!((v.re - 1.0) < 1e-13)
+    assert!((v.re - 1.0) < 1e-13);
+    assert!((v.im - 0.0) < 1e-13);
 }
