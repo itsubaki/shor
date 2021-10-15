@@ -162,15 +162,16 @@ impl Q {
         let mut list: Vec<State> = vec![];
 
         for i in 0..self.qb.len() {
-            if self.qb[i] == z {
+            let rqb: Complex<f64> = round(self.qb[i]);
+            if rqb == z {
                 continue;
             }
 
             list.push(State {
                 number_of_bit: nob,
                 index: i,
-                amp: self.qb[i],
-                prob: self.qb[i].norm().powf(2.0),
+                amp: rqb,
+                prob: rqb.norm().powf(2.0),
             });
         }
 
@@ -311,6 +312,19 @@ fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> G
     transpose(Rc::new(out))
 }
 
+fn round(c: Complex<f64>) -> Complex<f64> {
+    let mut out: Complex<f64> = c.clone();
+    if c.re.abs() < 1e-13 {
+        out.re = 0.0;
+    }
+
+    if c.im.abs() < 1e-13 {
+        out.im = 0.0;
+    }
+
+    out
+}
+
 fn take(bin: &[char], start: usize, end: usize) -> BinaryChars {
     bin[start..end].to_vec()
 }
@@ -354,6 +368,10 @@ fn clone(v: &[Complex<f64>]) -> Vec<Complex<f64>> {
     out
 }
 
+fn dagger(g: Gate) -> Gate {
+    transpose(conjugate(g))
+}
+
 fn transpose(g: Gate) -> Gate {
     let mut mat: Matrix = vec![];
 
@@ -386,6 +404,42 @@ fn conjugate(g: Gate) -> Gate {
     Rc::new(mat)
 }
 
-fn dagger(g: Gate) -> Gate {
-    transpose(conjugate(g))
+#[test]
+fn test_is_eigen_vector() {
+    let n: u32 = 15;
+    let a: u32 = 7;
+    let t: u32 = 3;
+
+    let mut qsim = Q::new();
+    let r0 = qsim.zero_with(t);
+    let r1 = qsim.zero_log2(n);
+
+    qsim.x(&[r1[r1.len() - 1]]);
+    qsim.h(&r0);
+    qsim.cmodexp2(a, n, &r0, &r1);
+    qsim.iqft(&r0);
+
+    let mut us: std::collections::HashMap<String, Complex<f64>> = std::collections::HashMap::new();
+    for state in qsim.state().iter() {
+        let m1: Vec<char> = state.to_binary_chars(&r1);
+        let ui: String = m1.iter().collect();
+
+        let v: Complex<f64> = match us.get(&ui) {
+            Some(vv) => state.amp + vv,
+            None => state.amp,
+        };
+
+        us.insert(ui, v);
+    }
+
+    for (m, v) in &us {
+        println!("{:?} {}", m, v);
+    }
+
+    let v: Complex<f64> = match us.get("0001") {
+        Some(v) => *v,
+        None => panic!("0001 not found"),
+    };
+
+    assert!((v.re - 1.0) < 1e-13)
 }
