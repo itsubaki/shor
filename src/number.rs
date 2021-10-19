@@ -27,7 +27,7 @@ pub fn coprime(n: u32) -> u32 {
     let mut rng = rand::thread_rng();
 
     loop {
-        let a: u32 = rng.gen_range(2..n - 1);
+        let a = rng.gen_range(2..n - 1);
         if gcd(n, a) == 1 {
             return a;
         }
@@ -35,10 +35,10 @@ pub fn coprime(n: u32) -> u32 {
 }
 
 pub fn base_exp(n: u32) -> (u32, u32, bool) {
-    let s: u32 = format!("{:b}", n).chars().count() as u32;
+    let s = format!("{:b}", n).chars().count() as u32;
 
     for i in (2..s).rev() {
-        let a: u32 = (n as f64).powf(1.0 / (i as f64)).round() as u32;
+        let a = (n as f64).powf(1.0 / (i as f64)).round() as u32;
         if a.pow(i) == n {
             return (a, i, true);
         }
@@ -87,13 +87,13 @@ pub fn modexp2(a: u32, j: u32, n: u32) -> u32 {
 
 pub fn continued_fraction(f: f64) -> Vec<u32> {
     let mut list: Vec<u32> = vec![];
-    let mut r: f64 = f;
+    let mut r = f;
 
     loop {
-        let t: f64 = r.trunc();
+        let t = r.trunc();
         list.push(t as u32);
 
-        let diff: f64 = r - t;
+        let diff = r - t;
         if diff < 1e-3 {
             break;
         }
@@ -105,13 +105,13 @@ pub fn continued_fraction(f: f64) -> Vec<u32> {
 }
 
 pub fn convergent(cf: &[u32]) -> (u32, u32) {
-    let len: usize = cf.len();
+    let len = cf.len();
     if len == 1 {
         return (cf[0], 1);
     }
 
-    let mut s: u32 = 1;
-    let mut r: u32 = cf[len - 1];
+    let mut s = 1;
+    let mut r = cf[len - 1];
     for i in 2..len {
         let tmp = s;
         s = r;
@@ -123,7 +123,7 @@ pub fn convergent(cf: &[u32]) -> (u32, u32) {
 }
 
 pub fn to_float(bin: &[char]) -> f64 {
-    let mut f: f64 = 0.0;
+    let mut f = 0.0;
 
     for (i, b) in bin.iter().enumerate() {
         if *b == '0' {
@@ -141,8 +141,8 @@ pub fn find_order(a: u32, n: u32, bin: &[char]) -> (u32, u32, bool) {
         return (0, 1, false);
     }
 
-    let fv: f64 = to_float(bin);
-    let cf: Vec<u32> = continued_fraction(fv);
+    let fv = to_float(bin);
+    let cf = continued_fraction(fv);
 
     for i in 0..cf.len() {
         let (s, r) = convergent(&cf[0..(i + 1)]);
@@ -167,11 +167,7 @@ pub fn is_trivial(n: u32, factor: &[u32]) -> bool {
 }
 
 pub fn is_odd(n: u32) -> bool {
-    if n % 2 == 0 {
-        return false;
-    }
-
-    true
+    n % 2 == 1
 }
 
 #[test]

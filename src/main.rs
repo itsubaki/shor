@@ -34,7 +34,7 @@ fn main() {
 
     let mut used: Vec<u32> = vec![];
     loop {
-        let a: u32 = number::coprime(n);
+        let a = number::coprime(n);
         if used.contains(&a) {
             continue;
         }
@@ -51,9 +51,9 @@ fn main() {
         qsim.cmodexp2(a, n, &r0, &r1);
         qsim.iqft(&r0);
 
-        let mut rate: f64 = 0.0;
+        let mut rate = 0.0;
         for state in qsim.state().iter() {
-            let m0: Vec<char> = state.to_binary_chars(&r0);
+            let m0 = state.to_binary_chars(&r0);
 
             let (_s, _r, ok) = number::find_order(a, n, &m0);
             if !ok || number::is_odd(_r) {
@@ -61,8 +61,8 @@ fn main() {
                 continue;
             }
 
-            let p0: u32 = number::gcd(a.pow(_r / 2) - 1, n);
-            let p1: u32 = number::gcd(a.pow(_r / 2) + 1, n);
+            let p0 = number::gcd(a.pow(_r / 2) - 1, n);
+            let p1 = number::gcd(a.pow(_r / 2) + 1, n);
 
             if number::is_trivial(n, &[p0, p1]) {
                 println!("{} s/r={:>2}/{:>2}; p={}, q={}", state, _s, _r, p0, p1);
