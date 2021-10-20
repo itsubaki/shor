@@ -410,6 +410,21 @@ fn conjugate(g: Gate) -> Gate {
 }
 
 #[test]
+fn test_to_binary_chars() {
+    assert_eq!(to_binary_chars(3, 5), vec!['0', '0', '0', '1', '1']);
+    assert_eq!(to_binary_chars(7, 5), vec!['0', '0', '1', '1', '1']);
+    assert_eq!(to_binary_chars(15, 5), vec!['0', '1', '1', '1', '1']);
+    assert_eq!(to_binary_chars(31, 5), vec!['1', '1', '1', '1', '1']);
+}
+
+#[test]
+fn test_to_decimal() {
+    assert_eq!(to_decimal(&['1']), 1);
+    assert_eq!(to_decimal(&['1', '1']), 3);
+    assert_eq!(to_decimal(&['1', '0', '1']), 5);
+}
+
+#[test]
 fn test_is_eigen_vector() {
     let n = 15;
     let a = 7;
