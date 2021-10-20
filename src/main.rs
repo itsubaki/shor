@@ -26,11 +26,10 @@ fn main() {
         return;
     }
 
-    let (base, exp, ok) = number::base_exp(n);
-    if ok {
+    if let Some((base, exp)) = number::base_exp(n) {
         println!("N={}. N is exponentiation. {}^{}.", n, base, exp);
         return;
-    }
+    };
 
     let mut used: Vec<u32> = vec![];
     loop {

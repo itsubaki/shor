@@ -34,17 +34,17 @@ pub fn coprime(n: u32) -> u32 {
     }
 }
 
-pub fn base_exp(n: u32) -> (u32, u32, bool) {
+pub fn base_exp(n: u32) -> Option<(u32, u32)> {
     let s = format!("{:b}", n).chars().count() as u32;
 
     for i in (2..s).rev() {
         let a = (n as f64).powf(1.0 / (i as f64)).round() as u32;
         if a.pow(i) == n {
-            return (a, i, true);
+            return Some((a, i));
         }
     }
 
-    (0, 0, false)
+    None
 }
 
 pub fn gcd(a: u32, b: u32) -> u32 {
@@ -207,10 +207,10 @@ fn test_gcd() {
 
 #[test]
 fn test_base_exp() {
-    assert_eq!(base_exp(25), (5, 2, true));
-    assert_eq!(base_exp(27), (3, 3, true));
-    assert_eq!(base_exp(36), (6, 2, true));
-    assert_eq!(base_exp(49), (7, 2, true));
+    assert_eq!(base_exp(25), Some((5, 2)));
+    assert_eq!(base_exp(27), Some((3, 3)));
+    assert_eq!(base_exp(36), Some((6, 2)));
+    assert_eq!(base_exp(49), Some((7, 2)));
 }
 
 #[test]

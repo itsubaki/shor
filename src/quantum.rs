@@ -432,15 +432,20 @@ fn test_is_eigen_vector() {
         us.insert(ui, v);
     }
 
-    for (m, v) in &us {
-        println!("{:?} {}", m, v);
+    let cases = vec![
+        ("0001", Complex::new(1.0, 0.0)),
+        ("0100", Complex::new(0.0, 0.0)),
+        ("0111", Complex::new(0.0, 0.0)),
+        ("1101", Complex::new(0.0, 0.0)),
+    ];
+
+    for (i, c) in cases {
+        let v = match us.get(i) {
+            Some(v) => *v,
+            None => panic!("{} not found", i),
+        };
+
+        assert!((v - c).re.abs() < 1e-13);
+        assert!((v - c).im.abs() < 1e-13);
     }
-
-    let v = match us.get("0001") {
-        Some(v) => *v,
-        None => panic!("0001 not found"),
-    };
-
-    assert!((v.re - 1.0) < 1e-13);
-    assert!((v.im - 0.0) < 1e-13);
 }
