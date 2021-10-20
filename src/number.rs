@@ -86,7 +86,7 @@ pub fn modexp2(a: u32, j: u32, n: u32) -> u32 {
 }
 
 pub fn continued_fraction(f: f64) -> Vec<u32> {
-    let mut list: Vec<u32> = vec![];
+    let mut list = vec![];
     let mut r = f;
 
     loop {

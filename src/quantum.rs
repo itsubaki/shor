@@ -3,9 +3,7 @@ use std::rc::Rc;
 
 pub type Qubit = Vec<Complex<f64>>;
 
-pub type Gate = Rc<Matrix>;
-
-pub type Matrix = Vec<Vec<Complex<f64>>>;
+pub type Gate = Vec<Vec<Complex<f64>>>;
 
 pub type BinaryChars = Vec<char>;
 
@@ -20,12 +18,12 @@ impl State {
     pub fn to_binary_chars(&self, qb: &[u32]) -> BinaryChars {
         let v = to_binary_chars(self.index, self.number_of_bit as usize);
 
-        let mut out: Vec<char> = vec![];
+        let mut bin = vec![];
         for i in qb {
-            out.push(v[*i as usize]);
+            bin.push(v[*i as usize]);
         }
 
-        out
+        bin
     }
 }
 
@@ -67,7 +65,7 @@ impl Q {
     }
 
     pub fn zero_with(&mut self, n: u32) -> Vec<u32> {
-        let mut list: Vec<u32> = vec![];
+        let mut list = vec![];
 
         for _ in 0..n {
             list.push(self.zero());
@@ -111,11 +109,13 @@ impl Q {
         self.apply(g)
     }
 
+    #[allow(clippy::needless_range_loop)]
     pub fn apply(&mut self, g: Gate) {
         let mut v: Qubit = vec![];
 
         for i in 0..g.len() {
             let mut e = Complex::new(0.0, 0.0);
+
             for j in 0..g[i].len() {
                 e += g[i][j] * self.qb[j];
             }
@@ -179,8 +179,8 @@ impl Q {
     }
 }
 
-fn tensor_(list: &[Gate]) -> Gate {
-    let mut g = Rc::clone(&list[0]);
+fn tensor_(list: &[Rc<Gate>]) -> Gate {
+    let mut g = list[0].to_vec();
 
     for i in list.iter().skip(1) {
         g = tensor(g, Rc::clone(i));
@@ -189,12 +189,13 @@ fn tensor_(list: &[Gate]) -> Gate {
     g
 }
 
-fn tensor(m: Gate, n: Gate) -> Gate {
-    let mut mat: Matrix = vec![];
+#[allow(clippy::needless_range_loop)]
+fn tensor(m: Gate, n: Rc<Gate>) -> Gate {
+    let mut g = vec![];
 
     for i in 0..m.len() {
         for k in 0..n.len() {
-            let mut v: Vec<Complex<f64>> = vec![];
+            let mut v = vec![];
 
             for j in 0..m[i].len() {
                 for l in 0..n[k].len() {
@@ -202,16 +203,17 @@ fn tensor(m: Gate, n: Gate) -> Gate {
                 }
             }
 
-            mat.push(v);
+            g.push(v);
         }
     }
 
-    Rc::new(mat)
+    g
 }
 
-fn gate_list(nob: u32, g: Gate, qb: &[u32]) -> Vec<Gate> {
-    let mut list: Vec<Gate> = vec![];
-    let identity = id();
+fn gate_list(nob: u32, g: Gate, qb: &[u32]) -> Vec<Rc<Gate>> {
+    let mut list = vec![];
+    let identity = Rc::new(id());
+    let rg = Rc::new(g);
 
     for i in 0..nob {
         let mut found = false;
@@ -224,7 +226,7 @@ fn gate_list(nob: u32, g: Gate, qb: &[u32]) -> Vec<Gate> {
         }
 
         if found {
-            list.push(Rc::clone(&g));
+            list.push(Rc::clone(&rg));
             continue;
         }
 
@@ -235,33 +237,33 @@ fn gate_list(nob: u32, g: Gate, qb: &[u32]) -> Vec<Gate> {
 }
 
 fn id() -> Gate {
-    Rc::new(vec![
+    vec![
         vec![Complex::new(1.0, 0.0), Complex::new(0.0, 0.0)],
         vec![Complex::new(0.0, 0.0), Complex::new(1.0, 0.0)],
-    ])
+    ]
 }
 
 fn x() -> Gate {
-    Rc::new(vec![
+    vec![
         vec![Complex::new(0.0, 0.0), Complex::new(1.0, 0.0)],
         vec![Complex::new(1.0, 0.0), Complex::new(0.0, 0.0)],
-    ])
+    ]
 }
 
 fn h() -> Gate {
     let e = Complex::new(1.0 / std::f64::consts::SQRT_2, 0.0);
-    Rc::new(vec![vec![e, e], vec![e, -1.0 * e]])
+    vec![vec![e, e], vec![e, -1.0 * e]]
 }
 
 fn cr(k: i32, nob: u32, control: u32, target: u32) -> Gate {
     // identity matrix
-    let mut mat = idmat(nob);
+    let mut g = id_(nob);
 
     // coefficient
     let p = 2.0 * std::f64::consts::PI / (2.0_f64.powf(k as f64));
     let e = Complex::new(0.0, p).exp();
 
-    for (i, v) in mat.iter_mut().enumerate() {
+    for (i, v) in g.iter_mut().enumerate() {
         let bits = to_binary_chars(i, nob as usize);
         if bits[control as usize] == '1' && bits[target as usize] == '1' {
             // apply
@@ -269,7 +271,7 @@ fn cr(k: i32, nob: u32, control: u32, target: u32) -> Gate {
         }
     }
 
-    transpose(Rc::new(mat))
+    transpose(g)
 }
 
 fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> Gate {
@@ -277,7 +279,7 @@ fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> G
     let r1len = target.len() as u32;
     let a2jmodn = super::number::modexp2(a, j, n);
 
-    let mut index: Vec<usize> = vec![];
+    let mut index = vec![];
     for i in 0..(2_usize.pow(nob)) {
         let bits = to_binary_chars(i, nob as usize);
         if bits[control as usize] == '0' {
@@ -303,26 +305,26 @@ fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> G
         index.push(to_decimal(&r0bits) as usize);
     }
 
-    let mat = idmat(nob);
-    let mut out: Matrix = vec![vec![]; mat.len()];
+    let identity = id_(nob);
+    let mut g = vec![vec![]; identity.len()];
     for (i, ii) in index.iter().enumerate() {
-        out[i] = clone(&mat[*ii]); // :(
+        g[i] = clone_vec(&identity[*ii]);
     }
 
-    transpose(Rc::new(out))
+    transpose(g)
 }
 
 fn round(c: Complex<f64>) -> Complex<f64> {
-    let mut out = c;
+    let mut round = c;
     if c.re.abs() < 1e-13 {
-        out.re = 0.0;
+        round.re = 0.0;
     }
 
     if c.im.abs() < 1e-13 {
-        out.im = 0.0;
+        round.im = 0.0;
     }
 
-    out
+    round
 }
 
 fn take(bin: &[char], start: usize, end: usize) -> BinaryChars {
@@ -338,11 +340,11 @@ fn to_decimal(v: &[char]) -> u32 {
     u32::from_str_radix(&s, 2).unwrap()
 }
 
-fn idmat(nob: u32) -> Matrix {
-    let mut mat: Matrix = vec![];
+fn id_(nob: u32) -> Vec<Vec<Complex<f64>>> {
+    let mut mat = vec![];
 
     for i in 0..(2_i32.pow(nob)) {
-        let mut v: Vec<Complex<f64>> = vec![];
+        let mut v = vec![];
 
         for j in 0..(2_i32.pow(nob)) {
             if i == j {
@@ -359,49 +361,52 @@ fn idmat(nob: u32) -> Matrix {
     mat
 }
 
-fn clone(v: &[Complex<f64>]) -> Vec<Complex<f64>> {
-    let mut out: Vec<Complex<f64>> = vec![];
+fn clone_vec(v: &[Complex<f64>]) -> Vec<Complex<f64>> {
+    let mut clone = vec![];
+
     for i in v {
-        out.push(*i);
+        clone.push(*i);
     }
 
-    out
+    clone
 }
 
 fn dagger(g: Gate) -> Gate {
     transpose(conjugate(g))
 }
 
+#[allow(clippy::needless_range_loop)]
 fn transpose(g: Gate) -> Gate {
-    let mut mat: Matrix = vec![];
+    let mut trans = vec![];
 
     for i in 0..g.len() {
-        let mut v: Vec<Complex<f64>> = vec![];
+        let mut v = vec![];
 
         for j in 0..g[i].len() {
             v.push(g[j][i])
         }
 
-        mat.push(v);
+        trans.push(v);
     }
 
-    Rc::new(mat)
+    trans
 }
 
+#[allow(clippy::needless_range_loop)]
 fn conjugate(g: Gate) -> Gate {
-    let mut mat: Matrix = vec![];
+    let mut conj = vec![];
 
     for i in 0..g.len() {
-        let mut v: Vec<Complex<f64>> = vec![];
+        let mut v = vec![];
 
         for j in 0..g[i].len() {
             v.push(g[i][j].conj());
         }
 
-        mat.push(v);
+        conj.push(v);
     }
 
-    Rc::new(mat)
+    conj
 }
 
 #[test]
