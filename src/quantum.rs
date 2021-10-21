@@ -2,16 +2,18 @@ use num::Complex;
 use num::Zero;
 use std::rc::Rc;
 
-pub type Qubit = Vec<Complex<f64>>;
+pub type Complex64 = Complex<f64>;
 
-pub type Gate = Vec<Vec<Complex<f64>>>;
+pub type Qubit = Vec<Complex64>;
+
+pub type Gate = Vec<Vec<Complex64>>;
 
 pub type BinaryChars = Vec<char>;
 
 pub struct State {
     number_of_bit: u32,
     pub index: usize,
-    pub amp: Complex<f64>,
+    pub amp: Complex64,
     pub prob: f64,
 }
 
@@ -314,7 +316,7 @@ fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> G
     transpose(g)
 }
 
-fn round(c: Complex<f64>) -> Complex<f64> {
+fn round(c: Complex64) -> Complex64 {
     let mut round = c;
     if c.re.abs() < 1e-13 {
         round.re = 0.0;
@@ -340,7 +342,7 @@ fn to_decimal(v: &[char]) -> u32 {
     u32::from_str_radix(&s, 2).unwrap()
 }
 
-fn id_(nob: u32) -> Vec<Vec<Complex<f64>>> {
+fn id_(nob: u32) -> Vec<Vec<Complex64>> {
     let mut mat = vec![];
 
     for i in 0..(2_i32.pow(nob)) {
@@ -361,7 +363,7 @@ fn id_(nob: u32) -> Vec<Vec<Complex<f64>>> {
     mat
 }
 
-fn clone_vec(v: &[Complex<f64>]) -> Vec<Complex<f64>> {
+fn clone_vec(v: &[Complex64]) -> Vec<Complex64> {
     let mut clone = vec![];
 
     for i in v {
