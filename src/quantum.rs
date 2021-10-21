@@ -1,4 +1,5 @@
 use num::Complex;
+use num::Zero;
 use std::rc::Rc;
 
 pub type Qubit = Vec<Complex<f64>>;
@@ -80,7 +81,7 @@ impl Q {
     }
 
     fn tensor_vec(&mut self, qb: Qubit) {
-        let mut v: Qubit = vec![];
+        let mut v = vec![];
 
         for w in &self.qb {
             for j in &qb {
@@ -111,7 +112,7 @@ impl Q {
 
     #[allow(clippy::needless_range_loop)]
     pub fn apply(&mut self, g: Gate) {
-        let mut v: Qubit = vec![];
+        let mut v = vec![];
 
         for i in 0..g.len() {
             let mut e = Complex::new(0.0, 0.0);
@@ -157,13 +158,12 @@ impl Q {
     }
 
     pub fn state(&self) -> Vec<State> {
-        let mut list: Vec<State> = vec![];
-        let z = Complex::new(0.0, 0.0);
+        let mut list = vec![];
         let nob = self.number_of_bit();
 
         for i in 0..self.qb.len() {
             let rqb = round(self.qb[i]);
-            if rqb == z {
+            if rqb.is_zero() {
                 continue;
             }
 

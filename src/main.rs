@@ -31,7 +31,7 @@ fn main() {
         return;
     };
 
-    let mut used: Vec<u32> = vec![];
+    let mut used = vec![];
     loop {
         let a = number::coprime(n);
         if used.contains(&a) {
