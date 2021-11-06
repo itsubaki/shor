@@ -50,6 +50,9 @@ fn main() {
         qsim.cmodexp2(a, n, &r0, &r1);
         qsim.iqft(&r0);
 
+        print(&qsim);
+        println!();
+
         let mut rate = 0.0;
         for state in qsim.state().iter() {
             let m0 = state.to_binary_chars(&r0);
@@ -77,4 +80,23 @@ fn main() {
             break;
         }
     }
+}
+
+fn print(qsim: &quantum::Q) {
+    let max = max(qsim.state());
+    for state in qsim.state().iter() {
+        let size = (state.prob / max * 32.0) as usize;
+        println!("{} {}", state, (0..size).map(|_| "*").collect::<String>());
+    }
+}
+
+fn max(states: Vec<quantum::State>) -> f64 {
+    let mut max = 0.0;
+    for state in states.iter() {
+        if state.prob > max {
+            max = state.prob;
+        }
+    }
+
+    max
 }
