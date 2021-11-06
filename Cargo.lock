@@ -155,7 +155,7 @@ dependencies = [
 
 [[package]]
 name = "shor"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "num",
  "rand",
