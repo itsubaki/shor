@@ -79,6 +79,8 @@ fn main() {
             println!("success rate: {}", rate);
             break;
         }
+
+        println!();
     }
 }
 
