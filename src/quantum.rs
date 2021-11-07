@@ -59,7 +59,7 @@ impl Q {
             return 0;
         }
 
-        self.tensor_vec(qb);
+        self.tensor(qb);
         self.number_of_bit() - 1
     }
 
@@ -82,7 +82,7 @@ impl Q {
         self.zero_with(log2n)
     }
 
-    fn tensor_vec(&mut self, qb: Qubit) {
+    fn tensor(&mut self, qb: Qubit) {
         let mut v = vec![];
 
         for w in &self.qb {
@@ -99,16 +99,16 @@ impl Q {
     }
 
     pub fn x(&mut self, qb: &[u32]) {
-        self.apply_(x(), qb)
+        self.apply_with(x(), qb)
     }
 
     pub fn h(&mut self, qb: &[u32]) {
-        self.apply_(h(), qb)
+        self.apply_with(h(), qb)
     }
 
-    fn apply_(&mut self, g: Gate, qb: &[u32]) {
+    fn apply_with(&mut self, g: Gate, qb: &[u32]) {
         let list = gate_list(self.number_of_bit(), g, qb);
-        let g = tensor_(&list);
+        let g = tensor_with(&list);
         self.apply(g)
     }
 
@@ -181,7 +181,7 @@ impl Q {
     }
 }
 
-fn tensor_(list: &[Rc<Gate>]) -> Gate {
+fn tensor_with(list: &[Rc<Gate>]) -> Gate {
     let mut g = list[0].to_vec();
 
     for i in list.iter().skip(1) {
@@ -239,10 +239,7 @@ fn gate_list(nob: u32, g: Gate, qb: &[u32]) -> Vec<Rc<Gate>> {
 }
 
 fn id() -> Gate {
-    vec![
-        vec![Complex::new(1.0, 0.0), Complex::new(0.0, 0.0)],
-        vec![Complex::new(0.0, 0.0), Complex::new(1.0, 0.0)],
-    ]
+    id_with(1)
 }
 
 fn x() -> Gate {
@@ -259,7 +256,7 @@ fn h() -> Gate {
 
 fn cr(k: i32, nob: u32, control: u32, target: u32) -> Gate {
     // identity matrix
-    let mut g = id_(nob);
+    let mut g = id_with(nob);
 
     // coefficient
     let p = 2.0 * std::f64::consts::PI / (2.0_f64.powf(k as f64));
@@ -307,7 +304,7 @@ fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> G
         index.push(to_decimal(&r0bits) as usize);
     }
 
-    let identity = id_(nob);
+    let identity = id_with(nob);
     let mut g = vec![vec![]; identity.len()];
     for (i, ii) in index.iter().enumerate() {
         g[i] = clone_vec(&identity[*ii]);
@@ -342,7 +339,7 @@ fn to_decimal(v: &[char]) -> u32 {
     u32::from_str_radix(&s, 2).unwrap()
 }
 
-fn id_(nob: u32) -> Vec<Vec<Complex64>> {
+fn id_with(nob: u32) -> Vec<Vec<Complex64>> {
     let mut mat = vec![];
 
     for i in 0..(2_i32.pow(nob)) {
