@@ -214,7 +214,7 @@ fn tensor(m: Gate, n: Rc<Gate>) -> Gate {
 
 fn gate_list(nob: u32, g: Gate, qb: &[u32]) -> Vec<Rc<Gate>> {
     let mut list = vec![];
-    let identity = Rc::new(id());
+    let id = Rc::new(id());
     let rg = Rc::new(g);
 
     for i in 0..nob {
@@ -232,7 +232,7 @@ fn gate_list(nob: u32, g: Gate, qb: &[u32]) -> Vec<Rc<Gate>> {
             continue;
         }
 
-        list.push(Rc::clone(&identity));
+        list.push(Rc::clone(&id));
     }
 
     list
@@ -304,10 +304,10 @@ fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> G
         index.push(to_decimal(&r0bits) as usize);
     }
 
-    let identity = id_with(nob);
-    let mut g = vec![vec![]; identity.len()];
+    let id = id_with(nob);
+    let mut g = vec![vec![]; id.len()];
     for (i, ii) in index.iter().enumerate() {
-        g[i] = clone_vec(&identity[*ii]);
+        g[i] = id[*ii].to_vec();
     }
 
     transpose(g)
@@ -358,16 +358,6 @@ fn id_with(nob: u32) -> Vec<Vec<Complex64>> {
     }
 
     mat
-}
-
-fn clone_vec(v: &[Complex64]) -> Vec<Complex64> {
-    let mut clone = vec![];
-
-    for i in v {
-        clone.push(*i);
-    }
-
-    clone
 }
 
 fn dagger(g: Gate) -> Gate {
