@@ -3,6 +3,10 @@
 Shor's factoring algorithm written in rust
 
 ```
+$ cargo install shor
+```
+
+```
 $ shor 15
 N: 15 (a: 8, t: 3)
 p=3, q=5; 0100001 +0.2500 +0.0000 0.0625 s/r= 1/ 4
