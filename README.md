@@ -3,7 +3,7 @@
 Shor's factoring algorithm written in rust
 
 ```
-$ cargo install shor
+cargo install shor
 ```
 
 ```
