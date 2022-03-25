@@ -34,7 +34,7 @@ impl std::fmt::Display for State {
     fn fmt(&self, dest: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             dest,
-            "{:>0n$b} {:>+.4} {:>+.4} {:>.4}",
+            "[{:>0n$b}]({:>+.4} {:>+.4}): {:>.4}",
             self.index,
             self.amp.re,
             self.amp.im,

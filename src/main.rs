@@ -59,7 +59,7 @@ fn main() {
 
             let (_s, _r, ok) = number::find_order(a, n, &m0);
             if !ok || number::is_odd(_r) {
-                println!("{} s/r={:>2}/{:>2};", state, _s, _r);
+                println!("{}; s/r={:>2}/{:>2};", state, _s, _r);
                 continue;
             }
 
@@ -67,11 +67,11 @@ fn main() {
             let p1 = number::gcd(a.pow(_r / 2) + 1, n);
 
             if number::is_trivial(n, &[p0, p1]) {
-                println!("{} s/r={:>2}/{:>2}; p={}, q={}", state, _s, _r, p0, p1);
+                println!("{}; s/r={:>2}/{:>2}; p={}, q={}", state, _s, _r, p0, p1);
                 continue;
             }
 
-            println!("{} s/r={:>2}/{:>2}; p={}, q={}", state, _s, _r, p0, p1);
+            println!("{}; s/r={:>2}/{:>2}; p={}, q={}", state, _s, _r, p0, p1);
             rate += state.prob;
         }
 
@@ -88,7 +88,7 @@ fn print(qsim: &quantum::Q) {
     let max = max(qsim.state());
     for state in qsim.state().iter() {
         let size = (state.prob / max * 32.0) as usize;
-        println!("{} {}", state, (0..size).map(|_| "*").collect::<String>());
+        println!("{}; {}", state, (0..size).map(|_| "*").collect::<String>());
     }
 }
 
