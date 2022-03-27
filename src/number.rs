@@ -122,7 +122,7 @@ pub fn convergent(cf: &[u32]) -> (u32, u32) {
     (s, r)
 }
 
-pub fn to_float(bin: &[char]) -> f64 {
+pub fn parse_float(bin: &[char]) -> f64 {
     let mut f = 0.0;
 
     for (i, b) in bin.iter().enumerate() {
@@ -141,7 +141,7 @@ pub fn find_order(a: u32, n: u32, bin: &[char]) -> (u32, u32, bool) {
         return (0, 1, false);
     }
 
-    let fv = to_float(bin);
+    let fv = parse_float(bin);
     let cf = continued_fraction(fv);
 
     for i in 0..cf.len() {
