@@ -22,8 +22,5 @@ fmt:
 check:
 	cargo check
 
-install: fmt lint
-	cargo install --path .
-
 rustup:
 	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh

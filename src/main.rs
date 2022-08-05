@@ -57,25 +57,26 @@ fn main() {
         for state in qsim.state().iter() {
             let m0 = state.to_binary_chars(&r0);
 
-            let (_s, _r, ok) = number::find_order(a, n, &m0);
-            if !ok || number::is_odd(_r) {
-                println!("{}; s/r={:>2}/{:>2};", state, _s, _r);
+            let (s, r, ok) = number::find_order(a, n, &m0);
+            if !ok || number::is_odd(r) {
+                println!("{}; s/r={:>2}/{:>2};", state, s, r);
                 continue;
             }
 
-            let p0 = number::gcd(a.pow(_r / 2) - 1, n);
-            let p1 = number::gcd(a.pow(_r / 2) + 1, n);
+            let p0 = number::gcd(a.pow(r / 2) - 1, n);
+            let p1 = number::gcd(a.pow(r / 2) + 1, n);
 
             if number::is_trivial(n, &[p0, p1]) {
-                println!("{}; s/r={:>2}/{:>2}; p={}, q={}", state, _s, _r, p0, p1);
+                println!("{}; s/r={:>2}/{:>2}; p={}, q={}", state, s, r, p0, p1);
                 continue;
             }
 
-            println!("{}; s/r={:>2}/{:>2}; p={}, q={}", state, _s, _r, p0, p1);
+            println!("{}; s/r={:>2}/{:>2}; p={}, q={}", state, s, r, p0, p1);
             rate += state.prob;
         }
 
         if rate > 0.0 {
+            println!();
             println!("success rate: {}", rate);
             break;
         }
