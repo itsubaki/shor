@@ -53,7 +53,7 @@ fn main() {
         print(&qsim);
         println!();
 
-        let mut rate = 0.0;
+        let mut found = false;
         for state in qsim.state().iter() {
             let m0 = state.to_binary_chars(&r0);
 
@@ -72,12 +72,11 @@ fn main() {
             }
 
             println!("{}; s/r={:>2}/{:>2}; p={}, q={}", state, s, r, p0, p1);
-            rate += state.prob;
+            found = true
         }
 
-        if rate > 0.0 {
+        if found {
             println!();
-            println!("success rate: {}", rate);
             break;
         }
 
