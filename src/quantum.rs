@@ -145,7 +145,8 @@ impl Q {
 
             // for j := l - 1; j > i; j-- {}
             for j in ((i + 1)..len).rev() {
-                self.icr(k, qb[j], qb[i]);
+                let theta = -2.0 * std::f64::consts::PI / (2.0_f64.powf(k as f64));
+                self.cr(theta, qb[j], qb[i]);
                 k -= 1;
             }
 
@@ -153,9 +154,9 @@ impl Q {
         }
     }
 
-    pub fn icr(&mut self, k: i32, control: u32, target: u32) {
+    pub fn cr(&mut self, theta: f64, control: u32, target: u32) {
         let n = self.number_of_bit();
-        let g = dagger(cr(k, n, control, target));
+        let g = cr(theta, n, control, target);
         self.apply(g)
     }
 
@@ -254,13 +255,12 @@ fn h() -> Gate {
     vec![vec![e, e], vec![e, -1.0 * e]]
 }
 
-fn cr(k: i32, nob: u32, control: u32, target: u32) -> Gate {
+fn cr(theta: f64, nob: u32, control: u32, target: u32) -> Gate {
     // identity matrix
     let mut g = id_with(nob);
 
     // coefficient
-    let p = 2.0 * std::f64::consts::PI / (2.0_f64.powf(k as f64));
-    let e = Complex::new(0.0, p).exp();
+    let e = Complex::new(0.0, theta).exp();
 
     for (i, v) in g.iter_mut().enumerate() {
         let bits = to_binary_chars(i, nob as usize);
@@ -270,7 +270,7 @@ fn cr(k: i32, nob: u32, control: u32, target: u32) -> Gate {
         }
     }
 
-    transpose(g)
+    g
 }
 
 fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> Gate {
@@ -307,10 +307,10 @@ fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> G
     let id = id_with(nob);
     let mut g = vec![vec![]; id.len()];
     for (i, ii) in index.iter().enumerate() {
-        g[i] = id[*ii].to_vec();
+        g[*ii] = id[i].to_vec();
     }
 
-    transpose(g)
+    g
 }
 
 fn round(c: Complex64) -> Complex64 {
@@ -358,44 +358,6 @@ fn id_with(nob: u32) -> Vec<Vec<Complex64>> {
     }
 
     mat
-}
-
-fn dagger(g: Gate) -> Gate {
-    transpose(conjugate(g))
-}
-
-#[allow(clippy::needless_range_loop)]
-fn transpose(g: Gate) -> Gate {
-    let mut trans = vec![];
-
-    for i in 0..g.len() {
-        let mut v = vec![];
-
-        for j in 0..g[i].len() {
-            v.push(g[j][i])
-        }
-
-        trans.push(v);
-    }
-
-    trans
-}
-
-#[allow(clippy::needless_range_loop)]
-fn conjugate(g: Gate) -> Gate {
-    let mut conj = vec![];
-
-    for i in 0..g.len() {
-        let mut v = vec![];
-
-        for j in 0..g[i].len() {
-            v.push(g[i][j].conj());
-        }
-
-        conj.push(v);
-    }
-
-    conj
 }
 
 #[test]
