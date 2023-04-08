@@ -107,6 +107,7 @@ impl Q {
     }
 
     fn apply_with(&mut self, g: Gate, qb: &[u32]) {
+        // using std::rc::Rc
         let list = gate_list(self.number_of_bit(), g, qb);
         let g = tensor_with(&list);
         self.apply(g)
