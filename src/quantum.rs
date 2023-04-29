@@ -1,6 +1,5 @@
 use num::Complex;
 use num::Zero;
-use std::rc::Rc;
 
 pub type Complex64 = Complex<f64>;
 
@@ -83,7 +82,7 @@ impl Q {
     }
 
     fn tensor(&mut self, qb: Qubit) {
-        let mut v = vec![];
+        let mut v: Qubit = vec![];
 
         for w in &self.qb {
             for j in &qb {
@@ -107,15 +106,15 @@ impl Q {
     }
 
     fn apply_with(&mut self, g: Gate, qb: &[u32]) {
-        // using std::rc::Rc
-        let list = gate_list(self.number_of_bit(), g, qb);
-        let g = tensor_with(&list);
+        let list: Vec<Gate> = gate_list(self.number_of_bit(), g, qb);
+        let g: Gate = tensor_with(&list);
+
         self.apply(g)
     }
 
     #[allow(clippy::needless_range_loop)]
     pub fn apply(&mut self, g: Gate) {
-        let mut v = vec![];
+        let mut v: Qubit = vec![];
 
         for i in 0..g.len() {
             let mut e = Complex::new(0.0, 0.0);
@@ -157,7 +156,7 @@ impl Q {
 
     pub fn cr(&mut self, theta: f64, control: u32, target: u32) {
         let n = self.number_of_bit();
-        let g = cr(theta, n, control, target);
+        let g: Gate = cr(theta, n, control, target);
         self.apply(g)
     }
 
@@ -183,19 +182,43 @@ impl Q {
     }
 }
 
-fn tensor_with(list: &[Rc<Gate>]) -> Gate {
-    let mut g = list[0].to_vec();
+fn gate_list(nob: u32, g: Gate, qb: &[u32]) -> Vec<Gate> {
+    let mut list: Vec<Gate> = vec![];
+
+    for i in 0..nob {
+        let mut found = false;
+
+        for j in qb {
+            if i == *j {
+                found = true;
+                break;
+            }
+        }
+
+        if found {
+            list.push(g.to_vec());
+            continue;
+        }
+
+        list.push(id());
+    }
+
+    list
+}
+
+fn tensor_with(list: &[Gate]) -> Gate {
+    let mut g: Gate = list[0].to_vec();
 
     for i in list.iter().skip(1) {
-        g = tensor(g, Rc::clone(i));
+        g = tensor(g, i.to_vec());
     }
 
     g
 }
 
 #[allow(clippy::needless_range_loop)]
-fn tensor(m: Gate, n: Rc<Gate>) -> Gate {
-    let mut g = vec![];
+fn tensor(m: Gate, n: Gate) -> Gate {
+    let mut g: Gate = vec![];
 
     for i in 0..m.len() {
         for k in 0..n.len() {
@@ -212,32 +235,6 @@ fn tensor(m: Gate, n: Rc<Gate>) -> Gate {
     }
 
     g
-}
-
-fn gate_list(nob: u32, g: Gate, qb: &[u32]) -> Vec<Rc<Gate>> {
-    let mut list = vec![];
-    let id = Rc::new(id());
-    let rg = Rc::new(g);
-
-    for i in 0..nob {
-        let mut found = false;
-
-        for j in qb {
-            if i == *j {
-                found = true;
-                break;
-            }
-        }
-
-        if found {
-            list.push(Rc::clone(&rg));
-            continue;
-        }
-
-        list.push(Rc::clone(&id));
-    }
-
-    list
 }
 
 fn id() -> Gate {
@@ -258,7 +255,7 @@ fn h() -> Gate {
 
 fn cr(theta: f64, nob: u32, control: u32, target: u32) -> Gate {
     // identity matrix
-    let mut g = id_with(nob);
+    let mut g: Gate = id_with(nob);
 
     // coefficient
     let e = Complex::new(0.0, theta).exp();
@@ -305,8 +302,8 @@ fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> G
         index.push(to_decimal(&r0bits) as usize);
     }
 
-    let id = id_with(nob);
-    let mut g = vec![vec![]; id.len()];
+    let id: Gate = id_with(nob);
+    let mut g: Gate = vec![vec![]; id.len()];
     for (i, ii) in index.iter().enumerate() {
         g[*ii] = id[i].to_vec();
     }
@@ -341,7 +338,7 @@ fn to_decimal(v: &[char]) -> u32 {
 }
 
 fn id_with(nob: u32) -> Vec<Vec<Complex64>> {
-    let mut mat = vec![];
+    let mut g: Gate = vec![];
 
     for i in 0..(2_i32.pow(nob)) {
         let mut v = vec![];
@@ -355,10 +352,10 @@ fn id_with(nob: u32) -> Vec<Vec<Complex64>> {
             v.push(Complex::new(0.0, 0.0));
         }
 
-        mat.push(v);
+        g.push(v);
     }
 
-    mat
+    g
 }
 
 #[test]
@@ -404,20 +401,20 @@ fn test_is_eigen_vector() {
         us.insert(ui, v);
     }
 
-    let cases = vec![
+    let expected = vec![
         ("0001", Complex::new(1.0, 0.0)),
         ("0100", Complex::new(0.0, 0.0)),
         ("0111", Complex::new(0.0, 0.0)),
         ("1101", Complex::new(0.0, 0.0)),
     ];
 
-    for (i, c) in cases {
+    for (i, e) in expected {
         let v = match us.get(i) {
             Some(v) => *v,
             None => panic!("{} not found", i),
         };
 
-        assert!((v - c).re.abs() < 1e-13);
-        assert!((v - c).im.abs() < 1e-13);
+        assert!((v - e).re.abs() < 1e-13);
+        assert!((v - e).im.abs() < 1e-13);
     }
 }

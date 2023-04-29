@@ -2,6 +2,7 @@ mod number;
 mod quantum;
 
 // cargo run 15
+#[allow(clippy::many_single_char_names)]
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let n: u32 = args[1].parse().unwrap(); // positive integer
