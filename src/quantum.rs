@@ -31,14 +31,11 @@ impl State {
 
 impl std::fmt::Display for State {
     fn fmt(&self, dest: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let bits: String = format!("{:>0n$b}", self.index, n = self.number_of_bit as usize);
         write!(
             dest,
-            "[{:>0n$b}]({:>+.4} {:>+.4}): {:>.4}",
-            self.index,
-            self.amp.re,
-            self.amp.im,
-            self.prob,
-            n = self.number_of_bit as usize,
+            "[{}]({:>+.4} {:>+.4}): {:>.4}",
+            bits, self.amp.re, self.amp.im, self.prob,
         )
     }
 }
