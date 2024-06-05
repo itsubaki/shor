@@ -22,15 +22,15 @@ fn main() {
         return;
     }
 
+    if let Some((base, exp)) = number::base_exp(n) {
+        println!("N={}. N is exponentiation. {}^{}.", n, base, exp);
+        return;
+    }
+
     if number::is_prime(n) {
         println!("N={} is prime.", n);
         return;
     }
-
-    if let Some((base, exp)) = number::base_exp(n) {
-        println!("N={}. N is exponentiation. {}^{}.", n, base, exp);
-        return;
-    };
 
     let mut used = vec![];
     loop {

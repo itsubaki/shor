@@ -157,7 +157,7 @@ pub fn find_order(a: u32, n: u32, bin: &[char]) -> (u32, u32, bool) {
 }
 
 pub fn is_trivial(n: u32, factor: &[u32]) -> bool {
-    for (_, p) in factor.iter().enumerate() {
+    for p in factor.iter() {
         if 1 < *p && *p < n && n % p == 0 {
             return false;
         }
