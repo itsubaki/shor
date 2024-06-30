@@ -334,7 +334,7 @@ fn to_decimal(v: &[char]) -> u32 {
     u32::from_str_radix(&s, 2).unwrap()
 }
 
-fn id_with(nob: u32) -> Vec<Vec<Complex64>> {
+fn id_with(nob: u32) -> Gate {
     let mut g: Gate = vec![];
 
     for i in 0..(2_i32.pow(nob)) {
