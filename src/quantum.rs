@@ -81,9 +81,9 @@ impl Q {
     fn tensor(&mut self, qb: Qubit) {
         let mut v: Qubit = vec![];
 
-        for w in &self.qb {
-            for j in &qb {
-                v.push(w * j);
+        for x in &self.qb {
+            for y in &qb {
+                v.push(x * y);
             }
         }
 
@@ -109,15 +109,14 @@ impl Q {
         self.apply(g)
     }
 
-    #[allow(clippy::needless_range_loop)]
     pub fn apply(&mut self, g: Gate) {
         let mut v: Qubit = vec![];
 
-        for i in 0..g.len() {
+        for item in &g {
             let mut e = Complex::new(0.0, 0.0);
 
-            for j in 0..g[i].len() {
-                e += g[i][j] * self.qb[j];
+            for (j, _) in item.iter().enumerate() {
+                e += item[j] * self.qb[j];
             }
 
             v.push(e);
@@ -136,11 +135,9 @@ impl Q {
     pub fn iqft(&mut self, qb: &[u32]) {
         let len = qb.len();
 
-        // for i := l - 1; i > -1; i-- {}
         for i in (0..len).rev() {
             let mut k = (len - i) as i32;
 
-            // for j := l - 1; j > i; j-- {}
             for j in ((i + 1)..len).rev() {
                 let theta = -2.0 * std::f64::consts::PI / (2.0_f64.powf(k as f64));
                 self.cr(theta, qb[j], qb[i]);
@@ -162,16 +159,16 @@ impl Q {
         let nob = self.number_of_bit();
 
         for i in 0..self.qb.len() {
-            let rqb = round(self.qb[i]);
-            if rqb.is_zero() {
+            let r = round(self.qb[i]);
+            if r.is_zero() {
                 continue;
             }
 
             list.push(State {
                 number_of_bit: nob,
                 index: i,
-                amp: rqb,
-                prob: rqb.norm().powf(2.0),
+                amp: r,
+                prob: r.norm().powf(2.0),
             });
         }
 
@@ -213,16 +210,15 @@ fn tensor_with(list: &[Gate]) -> Gate {
     g
 }
 
-#[allow(clippy::needless_range_loop)]
 fn tensor(m: Gate, n: Gate) -> Gate {
     let mut g: Gate = vec![];
 
-    for i in 0..m.len() {
-        for k in 0..n.len() {
+    for (i, _) in m.iter().enumerate() {
+        for (k, _) in n.iter().enumerate() {
             let mut v = vec![];
 
-            for j in 0..m[i].len() {
-                for l in 0..n[k].len() {
+            for (j, _) in m[i].iter().enumerate() {
+                for (l, _) in n[k].iter().enumerate() {
                     v.push(m[i][j] * n[k][l]);
                 }
             }
