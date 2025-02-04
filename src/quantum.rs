@@ -246,17 +246,24 @@ fn h() -> Gate {
     vec![vec![e, e], vec![e, -1.0 * e]]
 }
 
-fn cr(theta: f64, nob: u32, control: u32, target: u32) -> Gate {
-    // identity matrix
-    let mut g: Gate = id_with(nob);
+fn id_with(nob: u32) -> Gate {
+    let s = 1 << nob;
+    let mut g = vec![vec![Complex::new(0.0, 0.0); s]; s];
 
-    // coefficient
+    for (i, row) in g.iter_mut().enumerate() {
+        row[i] = Complex::new(1.0, 0.0);
+    }
+
+    g
+}
+
+fn cr(theta: f64, nob: u32, control: u32, target: u32) -> Gate {
+    let mut g: Gate = id_with(nob);
     let e = Complex::new(0.0, theta).exp();
+    let mask = (1 << (nob - 1 - control)) as usize;
 
     for (i, v) in g.iter_mut().enumerate() {
-        let bits = to_binary_chars(i, nob as usize);
-        if bits[control as usize] == '1' && bits[target as usize] == '1' {
-            // apply
+        if (i & mask) == mask && (i & (1 << (nob - 1 - target))) != 0 {
             v[i] = e * v[i];
         }
     }
@@ -265,34 +272,24 @@ fn cr(theta: f64, nob: u32, control: u32, target: u32) -> Gate {
 }
 
 fn cmodexp2(nob: u32, a: u32, j: u32, n: u32, control: u32, target: &[u32]) -> Gate {
-    let r0len = nob - target.len() as u32;
     let r1len = target.len() as u32;
     let a2jmodn = super::number::modexp2(a, j, n);
 
-    let mut index = vec![];
-    for i in 0..(2_usize.pow(nob)) {
-        let bits = to_binary_chars(i, nob as usize);
-        if bits[control as usize] == '0' {
-            // i -> i
-            index.push(to_decimal(&bits) as usize);
+    let mut index: Vec<usize> = (0..(1 << nob)).collect();
+    for (i, idx) in index.iter_mut().enumerate() {
+        if (i >> (nob - 1 - control)) & 1 == 0 {
             continue;
         }
 
-        let r1bits = take(&bits, r0len as usize, bits.len());
-        let k = to_decimal(&r1bits);
-        if k > n - 1 {
-            // i -> i
-            index.push(to_decimal(&bits) as usize);
+        let mask = (1 << r1len) - 1;
+        let k = (i & mask) as u32;
+        if k > (n - 1) {
             continue;
         }
 
         // i -> a**2**j *k mod n
         let a2jkmodn = (a2jmodn * k) % n;
-        let mut a2jkmodns = to_binary_chars(a2jkmodn as usize, r1len as usize);
-
-        let mut r0bits = take(&bits, 0, r0len as usize);
-        r0bits.append(&mut a2jkmodns);
-        index.push(to_decimal(&r0bits) as usize);
+        *idx = (i >> r1len << r1len) | a2jkmodn as usize;
     }
 
     let id: Gate = id_with(nob);
@@ -317,38 +314,8 @@ fn round(c: Complex64) -> Complex64 {
     round
 }
 
-fn take(bin: &[char], start: usize, end: usize) -> BinaryChars {
-    bin[start..end].to_vec()
-}
-
 fn to_binary_chars(i: usize, nob: usize) -> BinaryChars {
     format!("{:>0n$b}", i, n = nob).chars().collect()
-}
-
-fn to_decimal(v: &[char]) -> u32 {
-    let s: String = v.iter().collect();
-    u32::from_str_radix(&s, 2).unwrap()
-}
-
-fn id_with(nob: u32) -> Gate {
-    let mut g: Gate = vec![];
-
-    for i in 0..(2_i32.pow(nob)) {
-        let mut v = vec![];
-
-        for j in 0..(2_i32.pow(nob)) {
-            if i == j {
-                v.push(Complex::new(1.0, 0.0));
-                continue;
-            }
-
-            v.push(Complex::new(0.0, 0.0));
-        }
-
-        g.push(v);
-    }
-
-    g
 }
 
 #[test]
@@ -357,13 +324,6 @@ fn test_to_binary_chars() {
     assert_eq!(to_binary_chars(7, 5), vec!['0', '0', '1', '1', '1']);
     assert_eq!(to_binary_chars(15, 5), vec!['0', '1', '1', '1', '1']);
     assert_eq!(to_binary_chars(31, 5), vec!['1', '1', '1', '1', '1']);
-}
-
-#[test]
-fn test_to_decimal() {
-    assert_eq!(to_decimal(&['1']), 1);
-    assert_eq!(to_decimal(&['1', '1']), 3);
-    assert_eq!(to_decimal(&['1', '0', '1']), 5);
 }
 
 #[test]
