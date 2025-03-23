@@ -43,7 +43,7 @@ fn main() {
         println!("N: {} (a: {}, t: {})", n, a, t);
 
         let mut qsim = quantum::Q::new();
-        let r0 = qsim.zero_with(t);
+        let r0 = qsim.zeros(t);
         let r1 = qsim.zero_log2(n);
 
         qsim.x(&[r1[r1.len() - 1]]);

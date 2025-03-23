@@ -63,7 +63,7 @@ impl Q {
         self.add(vec![Complex::new(1.0, 0.0), Complex::new(0.0, 0.0)])
     }
 
-    pub fn zero_with(&mut self, n: u32) -> Vec<u32> {
+    pub fn zeros(&mut self, n: u32) -> Vec<u32> {
         let mut list = vec![];
 
         for _ in 0..n {
@@ -75,7 +75,7 @@ impl Q {
 
     pub fn zero_log2(&mut self, n: u32) -> Vec<u32> {
         let log2n = ((n as f64).log2() as u32) + 1;
-        self.zero_with(log2n)
+        self.zeros(log2n)
     }
 
     fn tensor(&mut self, qb: Qubit) {
@@ -333,7 +333,7 @@ fn test_is_eigen_vector() {
     let t = 3;
 
     let mut qsim = Q::new();
-    let r0 = qsim.zero_with(t);
+    let r0 = qsim.zeros(t);
     let r1 = qsim.zero_log2(n);
 
     qsim.x(&[r1[r1.len() - 1]]);
