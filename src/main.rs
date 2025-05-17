@@ -1,5 +1,5 @@
-mod number;
-mod quantum;
+use q_rs::number;
+use q_rs::quantum;
 
 // cargo run 15
 #[allow(clippy::many_single_char_names)]

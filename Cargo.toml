@@ -8,5 +8,4 @@ repository = "https://github.com/itsubaki/shor"
 edition = "2018"
 
 [dependencies]
-rand = "0.8.4"
-num = "0.4.0"
+q-rs = "0.0.1"
