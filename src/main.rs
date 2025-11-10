@@ -54,6 +54,7 @@ fn main() {
         print(&qsim);
         println!();
 
+        let mut found = false;
         for state in qsim.state().iter() {
             let m0 = state.to_binary_chars(&r0);
 
@@ -72,9 +73,15 @@ fn main() {
             }
 
             println!("{}; s/r={:>2}/{:>2}; p={}, q={}", state, s, r, p0, p1);
-            return;
+            found = true
+        }
+
+        if found {
+            break;
         }
     }
+
+    println!();
 }
 
 fn print(qsim: &quantum::Q) {

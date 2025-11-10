@@ -137,9 +137,9 @@ dependencies = [
 
 [[package]]
 name = "q-rs"
-version = "0.0.1"
+version = "0.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fcdc889ea83a1ecbfb2e282275a574eef3e758533df20a344d6744c33cc3b245"
+checksum = "6e6d361d47a40541d1843d5c169959ac94a2a070eb8332eb928ada375fb23197"
 dependencies = [
  "num",
  "rand",
