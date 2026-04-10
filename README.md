@@ -1,6 +1,6 @@
 # shor
 
- - Shor's factoring algorithm written in Rust
+ - Shor's factoring algorithm in Rust
 
 ```
 cargo install shor
